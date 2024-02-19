@@ -1,7 +1,7 @@
 import { shuffleArray } from "../common/util";
-import { TileType } from "./types";
+import { BoardLayout, Number, Resource, Tile, TileType } from "./types";
 
-const TILES: TileType[] = [
+const TILES: Readonly<TileType[]> = Object.freeze([
   "ORE",
   "ORE",
   "ORE",
@@ -21,8 +21,43 @@ const TILES: TileType[] = [
   "SHEEP",
   "SHEEP",
   "DESERT",
-];
+]);
 
-export function newRandomBoard() {
-  return shuffleArray(Array.from(TILES));
+const NUMBERS: Readonly<Number[]> = Object.freeze([
+  "TWO",
+  "THREE",
+  "THREE",
+  "FOUR",
+  "FOUR",
+  "FIVE",
+  "FIVE",
+  "SIX",
+  "SIX",
+  "EIGHT",
+  "EIGHT",
+  "NINE",
+  "NINE",
+  "TEN",
+  "TEN",
+  "ELEVEN",
+  "ELEVEN",
+  "TWELVE",
+]);
+
+export function newRandomBoard(): BoardLayout {
+  const numbers = shuffleArray(Array.from(NUMBERS));
+  const tiles: Tile[] = [];
+  for (const resourceOrDesert of shuffleArray(Array.from(TILES))) {
+    if (resourceOrDesert === "DESERT") {
+      tiles.push("DESERT");
+    } else {
+      const resource: Resource = resourceOrDesert;
+      const number = numbers.pop();
+      if (!number) {
+        throw Error("Could not initlize board. Number not found");
+      }
+      tiles.push({ resource, number });
+    }
+  }
+  return Object.freeze({ tiles: Object.freeze(tiles) });
 }

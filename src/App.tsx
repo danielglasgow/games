@@ -1,8 +1,8 @@
 import "./App.css";
 import Board from "./board";
-import { TileType } from "./board/types";
+import { BoardLayout } from "./board/types";
 
-function App({ tiles }: { tiles: TileType[] }) {
+function App({ layout }: { layout: BoardLayout }) {
   return (
     <div
       style={{
@@ -12,7 +12,7 @@ function App({ tiles }: { tiles: TileType[] }) {
         height: "100vh",
       }}
     >
-      {Board({ tiles })}
+      {Board({ layout })}
     </div>
   );
 }
