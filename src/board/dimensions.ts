@@ -1,6 +1,6 @@
-const SCALE = 0.5; // 0-1
+const SCALE = 0.9; // 0-1
 const ROAD_FACTOR = 0.92; 
-const BUFFER_VMIN = 2;
+const BUFFER_VMIN = 2; // Extra space around the board to ensure all tiles fit at scale 1.0
 const ROWS = 5;
 const COLUMNS = 5;
 
@@ -29,7 +29,8 @@ const COLUMN_HEX_SIDE_VMIN =
   (BOARD_SIZE_VMIN - COLUMNS_ROAD_COUNT * ROAD_OVERLAY_OFFSET_VMIN) /
   WIDTH_HEX_SIDE;
 
-const HEX_SIDE_VMIN = Math.min(ROW_HEX_SIDE_VMIN, COLUMN_HEX_SIDE_VMIN);
+/** Length of on the six sides of a hexagon */
+export const HEX_SIDE_VMIN = Math.min(ROW_HEX_SIDE_VMIN, COLUMN_HEX_SIDE_VMIN);
 
 export const HEX_HEIGHT_VMIN = HEX_SIDE_VMIN * Math.sqrt(3);
 
