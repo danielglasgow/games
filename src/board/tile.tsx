@@ -24,11 +24,10 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import { Hex as HexData, HexState, Number, Resource, HexId  } from "./types";
+import {  Hex, HexId, HexState, Number, Resource, isResource } from "./types";
 
 const NUMBER_SIZE_PCT = 50;
 const PLACEMENT_INDICATOR_PCT = 20;
-
 const PLACEMENT_INDICATOR_VMIN =
   HEX_DIAMETER_VMIN * (PLACEMENT_INDICATOR_PCT / 100);
 
@@ -65,29 +64,29 @@ export function Spacer({ ratio }: { ratio: number }) {
   return <div style={{ height: height + "vmin" }}></div>;
 }
 
-export function Hexagon({ hex }: { hex: HexData }) {
-  const tile = hex.tile;
-  if (tile === "DESERT") {
-    return Hex({ background: desert }, hex.state, hex.location);
-  } else if (tile === "OCEAN") {
-    return Hex({ background: ocean }, hex.state, hex.location);
-  } else {
-    return Hex(
-      {
-        background: RESOURCE_BACKGROUNDS[tile.resource],
-        number: NUMBER_BACKGROUNDS[tile.number],
-      },
-      hex.state,
-      hex.location
+export function Hexagon({ hex }: { hex: Hex }) {
+  const layout = hex.layout;
+  if (isResource(layout)) {
+    return HexContainer(
+      ResourceHex(
+        {
+          background: RESOURCE_BACKGROUNDS[layout.resource],
+          number: NUMBER_BACKGROUNDS[layout.number],
+        },
+        hex.state
+      ),
+      hex.layout.location
     );
   }
+  if (layout.geography === "DESERT") {
+    return HexContainer(DesertHex(hex.state), hex.layout.location);
+  } else if (layout.geography === "OCEAN") {
+    return HexContainer(OceanHex(hex.state), hex.layout.location);
+  }
+  throw new Error("Unknown hex type");
 }
 
-function Hex(
-  content: { background: string; number?: string },
-  state: HexState,
-  location: HexId
-) {
+function HexContainer(content: JSX.Element, location: HexId) {
   return (
     <div
       key={`${location.row},${location.col}`}
@@ -100,37 +99,40 @@ function Hex(
         marginLeft: HEX_OVERALY_OFFSET_VMIN + "vmin",
       }}
     >
-      {InnerHex(content, state)}
+      {content}
     </div>
   );
 }
 
-function InnerHex(
-  {
-    background,
-    number,
-  }: {
-    background: string;
-    number?: string;
-  },
+function ResourceHex(
+  { background, number }: { background: string; number: string },
   state: HexState
 ) {
-  if (number) {
-    return (
-      <div>
-        {HexBackground(background)}
-        {HexNumber(number)}
-        {VertexIndicators(state)}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        {HexBackground(background)}
-        {VertexIndicators(state)}
-      </div>
-    );
-  }
+  return (
+    <div>
+      {HexBackground(background)}
+      {HexNumber(number)}
+      {VertexIndicators(state)}
+    </div>
+  );
+}
+
+function DesertHex(state: HexState) {
+  return (
+    <div>
+      {HexBackground(desert)}
+      {VertexIndicators(state)}
+    </div>
+  );
+}
+
+function OceanHex(state: HexState) {
+  return (
+    <div>
+      {HexBackground(ocean)}
+      {VertexIndicators(state)}
+    </div>
+  );
 }
 
 function HexNumber(src: string) {

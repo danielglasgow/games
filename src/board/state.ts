@@ -2,19 +2,21 @@ import { shuffleArray } from "../common/util";
 import {
   City,
   Desert,
+  GeographyLayout,
   Hex,
   HexId,
+  HexLayout,
   HexState,
-  LandTile,
   Number,
+  Ocean,
   Port,
   Resource,
+  ResourceLayout,
+  ResourceNumber,
   Road,
   Settlement,
-  Tile,
-  TileHex,
   VertexId,
-  isResourceHex,
+  isResource,
 } from "./types";
 
 const TILES: ReadonlyArray<Resource | Desert> = Object.freeze([
@@ -79,7 +81,7 @@ export function newRandomBoard(): BoardState {
 }
 
 interface BoardLayout {
-  readonly columns: ReadonlyArray<ReadonlyArray<TileHex>>;
+  readonly columns: ReadonlyArray<ReadonlyArray<HexLayout>>;
   readonly vertices: ReadonlyArray<VertexId>;
   readonly ports: ReadonlyArray<Port>;
 }
@@ -94,12 +96,13 @@ class BoardLayoutBuilder {
   }
 
   private vertices: VertexId[] = [];
-  private columns: ReadonlyArray<TileHex>[] = [];
+  private columns: ReadonlyArray<HexLayout>[] = [];
+  private landHexes: HexLayout[] = [];
   private currentColumnIndex: number = 1;
-  private currentColumn: TileHex[] = [];
+  private currentColumn: HexLayout[] = [];
   private currentRow: number = 0;
 
-  add(tile: LandTile) {
+  add(tile: ResourceNumber | Desert) {
     if (this.currentColumnIndex >= this.columnSizes.length - 1) {
       throw new Error("Illegal state: attempting to add to full board");
     }
@@ -124,27 +127,10 @@ class BoardLayoutBuilder {
     this.columns.push(
       this.oceanColumn(this.currentColumnIndex, this.currentColumnSize())
     );
-    const landTiles = this.columns
-      .flatMap((x) => x)
-      .filter((hex) => isResourceHex(hex) || hex.geography === "DESERT");
     const landVertices: VertexId[] = [];
-    console.log("BUILD VERTEXES");
     for (const vertex of this.vertices) {
-      const adjacentHexes = getAdjacentHexes(vertex);
-      if (vertex.col === 1 && vertex.row === 4) {
-        console.log(vertex);
-        console.log(adjacentHexes);
-      }
-      for (const hex of adjacentHexes) {
-        if (
-          landTiles.some(
-            (tile) =>
-              tile.location.row === hex.row && tile.location.col === hex.col
-          )
-        ) {
-          landVertices.push(vertex);
-          break;
-        }
+      if (this.landHexes.some((hex) => isAdjacent(hex, vertex))) {
+        landVertices.push(vertex);
       }
     }
     return new BoardState({
@@ -154,25 +140,20 @@ class BoardLayoutBuilder {
     });
   }
 
-  private push(tile: Tile) {
+  private push(hex: ResourceNumber | Ocean | Desert) {
     const location = { row: this.currentRow, col: this.currentColumnIndex };
-    if (tile == "DESERT") {
-      this.currentColumn.push({ geography: "DESERT", location });
-    } else if (tile == "OCEAN") {
+    if (hex == "DESERT") {
+      const desert: GeographyLayout = { geography: "DESERT", location };
+      this.currentColumn.push(desert);
+      this.landHexes.push(desert);
+    } else if (hex == "OCEAN") {
       this.currentColumn.push({ geography: "OCEAN", location });
     } else {
-      this.currentColumn.push({ location, ...tile });
+      const resource: ResourceLayout = { location, ...hex };
+      this.currentColumn.push(resource);
+      this.landHexes.push(resource);
     }
-    this.vertices.push({
-      row: this.currentRow,
-      col: this.currentColumnIndex,
-      side: "LEFT",
-    });
-    this.vertices.push({
-      row: this.currentRow,
-      col: this.currentColumnIndex,
-      side: "RIGHT",
-    });
+    this.pushVertex(location);
     this.currentRow++;
   }
 
@@ -188,42 +169,18 @@ class BoardLayoutBuilder {
   }
 
   private oceanColumn(columnIndex: number, size: number) {
-    const column: TileHex[] = [];
+    const column: HexLayout[] = [];
     for (let i = 0; i < size; i++) {
-      column.push({
-        geography: "OCEAN",
-        location: { row: i, col: columnIndex },
-      });
-      this.vertices.push({
-        row: i,
-        col: columnIndex,
-        side: "LEFT",
-      });
-      this.vertices.push({
-        row: i,
-        col: columnIndex,
-        side: "RIGHT",
-      });
+      const location = { row: i, col: columnIndex };
+      column.push({ geography: "OCEAN", location });
+      this.pushVertex(location);
     }
     return Object.freeze(column);
   }
-}
 
-function getAdjacentHexes(vertex: VertexId): HexId[] {
-  const { row, col } = vertex;
-  switch (vertex.side) {
-    case "LEFT":
-      return [
-        { row: row, col: col },
-        { row: row, col: col - 1 },
-        { row: row - 1, col: col },
-      ];
-    case "RIGHT":
-      return [
-        { row: row, col: col },
-        { row: row - 1, col: col },
-        { row: row, col: col + 1 },
-      ];
+  private pushVertex(location: HexId) {
+    this.vertices.push({ location, side: "LEFT" });
+    this.vertices.push({ location, side: "RIGHT" });
   }
 }
 
@@ -240,42 +197,68 @@ export class BoardState {
 
   columns(): Array<Array<Hex>> {
     return this.layout.columns.map((column) => {
-      return column.map((tile) => this.toHex(tile));
+      return column.map((tile) => this.toHexState(tile));
     });
   }
 
-  toHex(tile: TileHex): Hex {
-    const left = this.layout.vertices.filter(
-      (vertex) => vertex.side === "LEFT"
-    );
-    const right = this.layout.vertices.filter(
-      (vertex) => vertex.side === "RIGHT"
-    );
+  private toHexState(hex: HexLayout): Hex {
+    const { left, right } = this.getVertecies(hex);
     const state: HexState = {
-      leftVertex: left.some(
-        (vertex) =>
-          vertex.row === tile.location.row && vertex.col === tile.location.col
-      )
-        ? "OPEN"
-        : "CLOSED",
-      rightVertex: right.some(
-        (vertex) =>
-          vertex.row === tile.location.row && vertex.col === tile.location.col
-      )
-        ? "OPEN"
-        : "CLOSED",
+      leftVertex: left == null ? "CLOSED" : "OPEN",
+      rightVertex: right == null ? "CLOSED" : "OPEN",
       isBlocked: false,
     };
-
-    if (isResourceHex(tile)) {
-      return { state, tile, location: tile.location };
+    if (isResource(hex)) {
+      return { state, layout: hex };
     }
-    if (tile.geography === "DESERT") {
-      return { state, tile: "DESERT" , location: tile.location};
+    if (hex.geography === "DESERT") {
+      return { state, layout: hex };
     }
-    if (tile.geography === "OCEAN") {
-      return { state, tile: "OCEAN" , location: tile.location};
+    if (hex.geography === "OCEAN") {
+      return { state, layout: hex };
     }
     throw new Error("Illegal state: unknown tile type");
+  }
+
+  private getVertecies(hex: HexLayout): {
+    left: VertexId | null;
+    right: VertexId | null;
+  } {
+    const vertecies = this.layout.vertices.filter((vertex) =>
+      isSameLocation(vertex, hex)
+    );
+    if (vertecies.length > 2) {
+      throw new Error("Should not be more than two vertecies per hex");
+    }
+    return {
+      left: vertecies.find((vertex) => vertex.side === "LEFT") || null,
+      right: vertecies.find((vertex) => vertex.side === "RIGHT") || null,
+    };
+  }
+}
+
+function isAdjacent(hex: { location: HexId }, vertex: VertexId) {
+  return getAdjacentHexes(vertex).some((adjHex) => isSameLocation(adjHex, hex));
+}
+
+function isSameLocation(a: { location: HexId }, b: { location: HexId }) {
+  return a.location.row === b.location.row && a.location.col === b.location.col;
+}
+
+function getAdjacentHexes(vertex: VertexId): { location: HexId }[] {
+  const { row, col } = vertex.location;
+  switch (vertex.side) {
+    case "LEFT":
+      return [
+        { location: { row: row, col: col } },
+        { location: { row: row, col: col - 1 } },
+        { location: { row: row - 1, col: col } },
+      ];
+    case "RIGHT":
+      return [
+        { location: { row: row, col: col } },
+        { location: { row: row - 1, col: col } },
+        { location: { row: row, col: col + 1 } },
+      ];
   }
 }

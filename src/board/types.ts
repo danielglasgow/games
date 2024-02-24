@@ -16,36 +16,26 @@ export type Number =
   | "ELEVEN"
   | "TWELVE";
 
-export interface ResourceTile {
+export interface ResourceNumber {
   readonly resource: Resource;
   readonly number: Number;
 }
 
-interface Location {
+export interface GeographyLayout {
+  readonly geography: Desert | Ocean;
+  readonly location: HexId;
+}
+export interface ResourceLayout extends ResourceNumber {
   readonly location: HexId;
 }
 
-export type LandTile = ResourceTile | Desert;
+export type HexLayout = ResourceLayout | GeographyLayout;
 
-export type Tile = LandTile | Ocean;
-
-export interface GeographyHex extends Location {
-  readonly geography: Desert | Ocean;
-}
-export type ResourceHex = ResourceTile & Location;
-
-export function isResourceHex(hex: TileHex): hex is ResourceHex {
+export function isResource(layout: HexLayout): layout is ResourceLayout {
   return (
-    (hex as ResourceHex).resource !== undefined &&
-    (hex as ResourceHex).number !== undefined
+    (layout as ResourceLayout).resource !== undefined &&
+    (layout as ResourceLayout).number !== undefined
   );
-}
-
-export type TileHex = ResourceHex | GeographyHex;
-
-export interface BoardLayout {
-  readonly tiles: Readonly<Tile[]>;
-  readonly ports: Readonly<Port[]>;
 }
 
 export interface Port {
@@ -68,9 +58,13 @@ export interface Road {
   readonly player: string;
 }
 
-export interface VertexId {
+export interface HexId {
   readonly row: number;
   readonly col: number;
+}
+
+export interface VertexId {
+  readonly location: HexId;
   readonly side: "LEFT" | "RIGHT";
 }
 
@@ -82,15 +76,9 @@ export interface HexState {
   isBlocked: boolean;
 }
 
-export interface Hex {
-  readonly state: HexState;
-  readonly tile: Tile;
-  readonly location: HexId;
-}
-
 export interface EdgeId {}
 
-export interface HexId {
-  readonly row: number;
-  readonly col: number;
+export interface Hex {
+  readonly state: HexState;
+  readonly layout: HexLayout; 
 }
