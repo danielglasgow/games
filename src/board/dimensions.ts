@@ -1,8 +1,8 @@
-const SCALE = 0.75; // 0-1
+const SCALE = 1; // 0-1
 const ROAD_FACTOR = 0.92; 
 const BUFFER_VMIN = 2; // Extra space around the board to ensure all tiles fit at scale 1.0
-const ROWS = 5;
-const COLUMNS = 5;
+const ROWS = 7;
+const COLUMNS = 7;
 
 // DO NOT TUNE BELOW HERE
 

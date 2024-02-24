@@ -24,7 +24,7 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import { Number, Resource, Tile } from "./types";
+import { Hex as HexData, HexState, Number, Resource, HexId  } from "./types";
 
 const NUMBER_SIZE_PCT = 50;
 const PLACEMENT_INDICATOR_PCT = 20;
@@ -65,22 +65,32 @@ export function Spacer({ ratio }: { ratio: number }) {
   return <div style={{ height: height + "vmin" }}></div>;
 }
 
-export function Hexagon({ tile }: { tile: Tile }) {
+export function Hexagon({ hex }: { hex: HexData }) {
+  const tile = hex.tile;
   if (tile === "DESERT") {
-    return Hex({ background: desert });
+    return Hex({ background: desert }, hex.state, hex.location);
   } else if (tile === "OCEAN") {
-    return Hex({ background: ocean });
+    return Hex({ background: ocean }, hex.state, hex.location);
   } else {
-    return Hex({
-      background: RESOURCE_BACKGROUNDS[tile.resource],
-      number: NUMBER_BACKGROUNDS[tile.number],
-    });
+    return Hex(
+      {
+        background: RESOURCE_BACKGROUNDS[tile.resource],
+        number: NUMBER_BACKGROUNDS[tile.number],
+      },
+      hex.state,
+      hex.location
+    );
   }
 }
 
-function Hex(content: { background: string; number?: string }) {
+function Hex(
+  content: { background: string; number?: string },
+  state: HexState,
+  location: HexId
+) {
   return (
     <div
+      key={`${location.row},${location.col}`}
       style={{
         position: "relative",
         marginTop: ROAD_SPACING_VMIN / 2 + "vmin",
@@ -90,33 +100,34 @@ function Hex(content: { background: string; number?: string }) {
         marginLeft: HEX_OVERALY_OFFSET_VMIN + "vmin",
       }}
     >
-      {InnerHex(content)}
+      {InnerHex(content, state)}
     </div>
   );
 }
 
-function InnerHex({
-  background,
-  number,
-}: {
-  background: string;
-  number?: string;
-}) {
+function InnerHex(
+  {
+    background,
+    number,
+  }: {
+    background: string;
+    number?: string;
+  },
+  state: HexState
+) {
   if (number) {
     return (
       <div>
         {HexBackground(background)}
         {HexNumber(number)}
-        {LeftVertexIndicator()}
-        {RightVertexIndicator()}
+        {VertexIndicators(state)}
       </div>
     );
   } else {
     return (
       <div>
         {HexBackground(background)}
-        {LeftVertexIndicator()}
-        {RightVertexIndicator()}
+        {VertexIndicators(state)}
       </div>
     );
   }
@@ -155,6 +166,24 @@ function HexBackground(src: string) {
       />
     </div>
   );
+}
+
+function VertexIndicators(hex: HexState) {
+  if (hex.leftVertex === "OPEN" && hex.rightVertex === "OPEN") {
+    return (
+      <div>
+        {LeftVertexIndicator()}
+        {RightVertexIndicator()}
+      </div>
+    );
+  }
+  if (hex.leftVertex === "OPEN") {
+    return <div>{LeftVertexIndicator()}</div>;
+  }
+  if (hex.rightVertex === "OPEN") {
+    return <div>{RightVertexIndicator()}</div>;
+  }
+  return <div></div>;
 }
 
 function LeftVertexIndicator() {

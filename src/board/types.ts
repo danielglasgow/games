@@ -21,7 +21,27 @@ export interface ResourceTile {
   readonly number: Number;
 }
 
-export type Tile = ResourceTile | Desert | Ocean;
+interface Location {
+  readonly location: HexId;
+}
+
+export type LandTile = ResourceTile | Desert;
+
+export type Tile = LandTile | Ocean;
+
+export interface GeographyHex extends Location {
+  readonly geography: Desert | Ocean;
+}
+export type ResourceHex = ResourceTile & Location;
+
+export function isResourceHex(hex: TileHex): hex is ResourceHex {
+  return (
+    (hex as ResourceHex).resource !== undefined &&
+    (hex as ResourceHex).number !== undefined
+  );
+}
+
+export type TileHex = ResourceHex | GeographyHex;
 
 export interface BoardLayout {
   readonly tiles: Readonly<Tile[]>;
@@ -52,6 +72,20 @@ export interface VertexId {
   readonly row: number;
   readonly col: number;
   readonly side: "LEFT" | "RIGHT";
+}
+
+export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
+
+export interface HexState {
+  leftVertex: VertexState;
+  rightVertex: VertexState;
+  isBlocked: boolean;
+}
+
+export interface Hex {
+  readonly state: HexState;
+  readonly tile: Tile;
+  readonly location: HexId;
 }
 
 export interface EdgeId {}
