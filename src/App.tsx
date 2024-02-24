@@ -1,8 +1,8 @@
 import "./App.css";
 import Board from "./board";
-import { BoardLayout } from "./board/types";
+import { BoardState } from "./board/state";
 
-function App({ layout }: { layout: BoardLayout }) {
+function App({ board }: { board: BoardState }) {
   return (
     <div
       style={{
@@ -12,7 +12,7 @@ function App({ layout }: { layout: BoardLayout }) {
         height: "100vh",
       }}
     >
-      {Board({ layout })}
+      {Board({ board })}
     </div>
   );
 }

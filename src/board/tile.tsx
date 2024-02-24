@@ -8,6 +8,7 @@ import {
 
 import brick from "../assets/brick.svg";
 import desert from "../assets/desert.svg";
+import ocean from "../assets/ocean.svg";
 import ore from "../assets/ore.svg";
 import sheep from "../assets/sheep.svg";
 import wheat from "../assets/wheat.svg";
@@ -67,6 +68,8 @@ export function Spacer({ ratio }: { ratio: number }) {
 export function Hexagon({ tile }: { tile: Tile }) {
   if (tile === "DESERT") {
     return Hex({ background: desert });
+  } else if (tile === "OCEAN") {
+    return Hex({ background: ocean });
   } else {
     return Hex({
       background: RESOURCE_BACKGROUNDS[tile.resource],
