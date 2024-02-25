@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { newRandomBoard } from "./board/state";
+import { newRandomGame } from "./server/state";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(
@@ -9,7 +9,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App board={newRandomBoard()} />
+    <App game={newRandomGame()} />
   </React.StrictMode>
 );
 

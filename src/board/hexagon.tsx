@@ -24,7 +24,14 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import {  Hex, HexId, HexState, Number, Resource, isResource } from "./types";
+import {
+  Hex,
+  BoardControl,
+  HexId,
+  Number,
+  Resource,
+  isResource
+} from "./types";
 
 const NUMBER_SIZE_PCT = 50;
 const PLACEMENT_INDICATOR_PCT = 20;
@@ -64,7 +71,7 @@ export function Spacer({ ratio }: { ratio: number }) {
   return <div style={{ height: height + "vmin" }}></div>;
 }
 
-export function Hexagon({ hex }: { hex: Hex }) {
+export function Hexagon({ hex, control }: { hex: Hex; control: BoardControl }) {
   const layout = hex.layout;
   if (isResource(layout)) {
     return HexContainer(
@@ -73,15 +80,16 @@ export function Hexagon({ hex }: { hex: Hex }) {
           background: RESOURCE_BACKGROUNDS[layout.resource],
           number: NUMBER_BACKGROUNDS[layout.number],
         },
-        hex.state
+        hex,
+        control
       ),
       hex.layout.location
     );
   }
   if (layout.geography === "DESERT") {
-    return HexContainer(DesertHex(hex.state), hex.layout.location);
+    return HexContainer(DesertHex(hex, control), hex.layout.location);
   } else if (layout.geography === "OCEAN") {
-    return HexContainer(OceanHex(hex.state), hex.layout.location);
+    return HexContainer(OceanHex(hex, control), hex.layout.location);
   }
   throw new Error("Unknown hex type");
 }
@@ -106,31 +114,32 @@ function HexContainer(content: JSX.Element, location: HexId) {
 
 function ResourceHex(
   { background, number }: { background: string; number: string },
-  state: HexState
+  hex: Hex,
+  control: BoardControl
 ) {
   return (
     <div>
       {HexBackground(background)}
       {HexNumber(number)}
-      {VertexIndicators(state)}
+      {VertexIndicators(hex, control)}
     </div>
   );
 }
 
-function DesertHex(state: HexState) {
+function DesertHex(hex: Hex, control: BoardControl) {
   return (
     <div>
       {HexBackground(desert)}
-      {VertexIndicators(state)}
+      {VertexIndicators(hex, control)}
     </div>
   );
 }
 
-function OceanHex(state: HexState) {
+function OceanHex(hex: Hex, control: BoardControl) {
   return (
     <div>
       {HexBackground(ocean)}
-      {VertexIndicators(state)}
+      {VertexIndicators(hex, control)}
     </div>
   );
 }
@@ -170,25 +179,27 @@ function HexBackground(src: string) {
   );
 }
 
-function VertexIndicators(hex: HexState) {
-  if (hex.leftVertex === "OPEN" && hex.rightVertex === "OPEN") {
-    return (
-      <div>
-        {LeftVertexIndicator()}
-        {RightVertexIndicator()}
-      </div>
-    );
-  }
-  if (hex.leftVertex === "OPEN") {
-    return <div>{LeftVertexIndicator()}</div>;
-  }
-  if (hex.rightVertex === "OPEN") {
-    return <div>{RightVertexIndicator()}</div>;
+function VertexIndicators(hex: Hex, control: BoardControl) {
+  if (hex.state.showVertexIndicators) {
+    if (hex.state.leftVertex === "OPEN" && hex.state.rightVertex === "OPEN") {
+      return (
+        <div>
+          {LeftVertexIndicator(control, hex.layout.location)}
+          {RightVertexIndicator(control, hex.layout.location)}
+        </div>
+      );
+    }
+    if (hex.state.leftVertex === "OPEN") {
+      return <div>{LeftVertexIndicator(control, hex.layout.location)}</div>;
+    }
+    if (hex.state.rightVertex === "OPEN") {
+      return <div>{RightVertexIndicator(control, hex.layout.location)}</div>;
+    }
   }
   return <div></div>;
 }
 
-function LeftVertexIndicator() {
+function LeftVertexIndicator(control: BoardControl, location: HexId) {
   return (
     <div
       style={{
@@ -202,11 +213,12 @@ function LeftVertexIndicator() {
         position: "absolute",
         zIndex: 1,
       }}
+      onClick={() => control.clickVertexIndicator({ side: "LEFT", location })}
     ></div>
   );
 }
 
-function RightVertexIndicator() {
+function RightVertexIndicator(control: BoardControl, location: HexId) {
   return (
     <div
       style={{
@@ -220,6 +232,7 @@ function RightVertexIndicator() {
         position: "absolute",
         zIndex: 1,
       }}
+      onClick={() => control.clickVertexIndicator({ side: "RIGHT", location })}
     ></div>
   );
 }
