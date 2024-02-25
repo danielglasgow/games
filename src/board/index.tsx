@@ -1,6 +1,6 @@
 import { HEX_OVERALY_OFFSET_VMIN } from "./dimensions";
 import { BoardState } from "./state";
-import { Hexagon, Spacer } from "./tile";
+import { Hexagon, Spacer } from "./hexagon";
 
 export default function Board({ board }: { board: BoardState }) {
   const totalColumns = 7;
