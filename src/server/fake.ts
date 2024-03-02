@@ -25,6 +25,11 @@ class FakeServer {
     this.state = state;
     return Promise.resolve(this.state);
   }
+
+  // TODO: Make Async
+  getState(): GameState {
+    return this.state;
+  }
 }
 
 export interface MutableGameState {

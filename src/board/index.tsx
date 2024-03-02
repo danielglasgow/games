@@ -4,19 +4,17 @@ import { BoardState } from "./state";
 import { BoardControl } from "./types";
 
 export interface Board {
-  state: BoardState,
-  control: BoardControl,
+  state: BoardState;
+  control: BoardControl;
 }
 
-export default function Board({
-  board
-}: {
-  board: Board;
-}) {
+export default function Board({ board }: { board: Board }) {
   const totalColumns = 7;
   const midPoint = Math.floor(totalColumns / 2);
   const columns = board.state.columns().map((column, index) => {
-    const hexagons = column.map((hex) => Hexagon({ hex, control: board.control }));
+    const hexagons = column.map((hex) =>
+      Hexagon({ hex, control: board.control })
+    );
     return (
       <div
         style={{ display: "flex", flexDirection: "column" }}

@@ -1,39 +1,51 @@
 import {
-  GameState,
+  BoardLayout,
   HexId,
   HexLayout,
   VertexId,
-  isResource
+  isResource,
 } from "../server/types";
 
 import { Hex, HexState } from "./types";
 
+type IndicatorState = {
+  vertex: boolean;
+  roads: boolean;
+};
+
 export class BoardState {
-  constructor(readonly server: GameState) {}
+  constructor(
+    private readonly board: BoardLayout,
+    private indicators: IndicatorState
+  ) {}
 
-  private indicators = { vertex: false, roads: false };
-
-  showVertexIndicators() {
-    this.indicators.vertex = true;
-  }
-
-  hideVertexIndicators() {
-    this.indicators.vertex = false;
+  update(state: {
+    board?: BoardLayout;
+    indicators?: IndicatorState;
+  }): BoardState {
+    if (!state.board) {
+      state.board = this.board;
+    }
+    if (!state.indicators) {
+      state.indicators = this.indicators;
+    }
+    return new BoardState(state.board, state.indicators);
   }
 
   columns(): Array<Array<Hex>> {
-    return this.server.board.columns.map((column) => {
-      return column.map((hex) => this.toHexState(hex));
+    return this.board.columns.map((column) => {
+      return column.map((hex) => this.toHex(hex));
     });
   }
 
-  private toHexState(hex: HexLayout): Hex {
+  private toHex(hex: HexLayout): Hex {
     const { left, right } = this.getVertecies(hex);
     const state: HexState = {
       leftVertex: left == null ? "CLOSED" : "OPEN",
       rightVertex: right == null ? "CLOSED" : "OPEN",
       isBlocked: false,
       showVertexIndicators: this.indicators.vertex,
+      showEdgeIndicators: false,
     };
     if (isResource(hex)) {
       return { state, layout: hex };
@@ -51,7 +63,7 @@ export class BoardState {
     left: VertexId | null;
     right: VertexId | null;
   } {
-    const vertecies = this.server.board.vertices.filter((vertex) =>
+    const vertecies = this.board.vertices.filter((vertex) =>
       isSameLocation(vertex, hex)
     );
     if (vertecies.length > 2) {
@@ -68,4 +80,3 @@ export class BoardState {
 function isSameLocation(a: { location: HexId }, b: { location: HexId }) {
   return a.location.row === b.location.row && a.location.col === b.location.col;
 }
-

@@ -3,10 +3,11 @@ import { EdgeId, HexId, HexLayout, VertexId } from "../server/types";
 export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
 
 export interface HexState {
-  leftVertex: VertexState;
-  rightVertex: VertexState;
-  isBlocked: boolean;
-  showVertexIndicators: boolean;
+  readonly leftVertex: VertexState;
+  readonly rightVertex: VertexState;
+  readonly isBlocked: boolean;
+  readonly showVertexIndicators: boolean;
+  readonly showEdgeIndicators: boolean;
 }
 
 export interface Hex {

@@ -8,7 +8,7 @@ export class PlacementAction {
     this.vertex = vertex;
   }
 
-  confirm(): GameState {
+  confirm(): Promise<GameState> {
     if (!this.vertex) {
       throw new Error('Attempt to place settlement with no location');
     }

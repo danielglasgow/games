@@ -24,14 +24,8 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import {
-  Hex,
-  BoardControl,
-  HexId,
-  Number,
-  Resource,
-  isResource
-} from "./types";
+import { HexId, Number, Resource, isResource } from "../server/types";
+import { BoardControl, Hex } from "./types";
 
 const NUMBER_SIZE_PCT = 50;
 const PLACEMENT_INDICATOR_PCT = 20;

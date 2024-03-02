@@ -1,22 +1,12 @@
 import { useState } from "react";
 import "./App.css";
 import Board from "./board";
-import { GameState } from "./server/types";
-import { BoardState } from "./board/state";
 import { AppControl } from "./control";
 import { AppState } from "./types";
 
-function App({ state }: { game: AppState}) {
-  const [state, setState] = useState(game);
-  const control = new AppControl(game, state);
-  const placeSettlemnt = () => {
-    board.showVertexIndicators();
-    setActiveAction("PLACE_SETTLEMENT");
-  };
-  const cancel = () => {
-    board.hideVertexIndicators();
-    setActiveAction("NONE");
-  };
+function App({ app }: { app: AppState }) {
+  const [state, setState] = useState(app);
+  const control = new AppControl(state, setState);
   return (
     <div>
       <div
@@ -32,9 +22,9 @@ function App({ state }: { game: AppState}) {
             alignItems: "center",
           }}
         >
-          {Board({ board, control: {
-
-          } })}
+          {Board({
+            board: { state: state.board, control: control.getBoardControl() },
+          })}
         </div>
         <div
           id="actionbox"
@@ -48,7 +38,7 @@ function App({ state }: { game: AppState}) {
         >
           <button
             style={{ margin: "10px", width: "20vmin" }}
-            onClick={placeSettlemnt}
+            onClick={control.placeSettlement.bind(control)}
           >
             Place Settlement
           </button>
@@ -59,10 +49,10 @@ function App({ state }: { game: AppState}) {
             Place Road
           </button>
           <div>
-            {activeAction != "NONE" && (
+            {state.activeAction && (
               <button
                 style={{ margin: "10px", width: "20vmin" }}
-                onClick={cancel}
+                onClick={control.cancel}
               >
                 Cancel
               </button>
