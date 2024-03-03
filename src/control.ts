@@ -1,85 +1,40 @@
 import { Dispatch, SetStateAction } from "react";
-import { PlacementAction } from "./actions/placement";
-import { BoardControl } from "./board/types";
-import { EdgeId, GameState, HexId, VertexId } from "./server/types";
+import { Action } from "./actions";
+import { Controller } from "./control/controller";
+import { GameState } from "./server/types";
 import { AppState } from "./types";
 
-export class AppControl {
+export class AppControl extends Controller {
   constructor(
     private readonly app: AppState,
     private readonly setState: Dispatch<SetStateAction<AppState>>
-  ) {}
-
-  private pendingAction?: { confirm: () => Promise<GameState> };
-
-  cancel() {
-    this.pendingAction = undefined;
+  ) {
+    super()
   }
 
-  confirm() {
-    if (!this.pendingAction) {
-      throw new Error("Cannot confirm without a pending action");
+  private actionResolver: (action: Action) => void = () => {};
+
+  async startGameLoop() {
+    while (true) {
+      const action = await this.nextAction();
+      const server = await action.execute();
+      if (server) {
+        this.setState({...this.app, server})
+      } else {
+        // clear out any partial state leftover from an incomplete action
+        this.setState({...this.app});
+      }
     }
-    const statePromise = this.pendingAction.confirm();
-    this.lock();
-    this.setState({ ...this.app });
-    this.pendingAction = undefined;
-    statePromise.then((state) => {
-      this.unlock();
-      this.updateServerState(state);
+  }
+
+  private async nextAction(): Promise<Action> {
+    return new Promise(resolve => {
+      this.actionResolver = resolve;
     });
   }
 
-  placeSettlement() {
-    this.setState({
-      ...this.app,
-      activeAction: "PLACE_SETTLEMENT",
-      board: this.app.board.update({
-        indicators: { vertex: true, roads: false },
-      }),
-    });
-  }
-
-  getBoardControl(): BoardControl {
-    return {
-      clickVertexIndicator: (vertex: VertexId) => {
-        this.hideVertexIndicators();
-        switch (this.app.activeAction) {
-          case "PLACE_SETTLEMENT":
-            const action = new PlacementAction();
-            action.startConfirmPlacement(vertex);
-            this.pendingAction = action;
-        }
-      },
-      clickEdgeIndicator: (road: EdgeId) => {},
-      clickHex: (hex: HexId) => {},
-    };
-  }
-
-  private hideVertexIndicators() {
-    this.setState({
-      ...this.app,
-      board: this.app.board.update({
-        indicators: { vertex: false, roads: false },
-      }),
-    });
-  }
-
-  private showVertexIndicators() {
-    this.setState({
-      ...this.app,
-      board: this.app.board.update({
-        indicators: { vertex: true, roads: false },
-      }),
-    });
-  }
-
-  private updateServerState(server: GameState) {
-    this.setState({
-      ...this.app,
-      server,
-      board: this.app.board.update(server),
-    });
+  private setAction(action: Action) {
+    this.actionResolver(action);
   }
 
   private lock() {

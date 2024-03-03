@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
-import { BoardState } from "./board/state";
 import { SERVER } from "./server/fake";
 
 const root = ReactDOM.createRoot(
@@ -14,10 +13,6 @@ root.render(
     <App
       app={{
         server: SERVER.getState(),
-        board: new BoardState(SERVER.getState().board, {
-          vertex: false,
-          roads: false,
-        }),
         isLocked: false,
       }}
     />

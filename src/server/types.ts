@@ -130,6 +130,8 @@ export interface VertexId {
 
 export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
 
+export type Building = "SETTLEMENT" | "CITY";
+
 export interface EdgeId {}
 
 export interface BoardLayout {
