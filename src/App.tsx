@@ -23,7 +23,7 @@ function App({ app }: { app: AppState }) {
             alignItems: "center",
           }}
         >
-          {Board({layout: state.server.board}, control)}
+          {Board({ layout: state.server.board })}
         </div>
         {SidePanel(control)}
       </div>

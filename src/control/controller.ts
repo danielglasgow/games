@@ -1,6 +1,6 @@
 import { GameState, VertexId } from "../server/types";
 
-type EventType = "VERTEX_CLICKED"|"SERVER_STATE_UPDATED";
+type EventType = "VERTEX_CLICKED" | "SERVER_STATE_UPDATED";
 
 class Event<T> {
   constructor(readonly type: EventType) {}
@@ -20,25 +20,26 @@ export const events = {
 
 export abstract class Controller {
   private readonly handlers: EventHandler<unknown>[] = [];
-  private readonly children: Controller[] = [];
+  // private readonly children: Controller[] = [];
 
   constructor(private readonly parent?: Controller) {
-    parent?.children.push(this);
+    //parent?.children.push(this);
   }
 
   protected listen<T>(event: Event<T>, fn: EventHandlerFn<T>) {
     const handler = this.getHandler(event);
     if (!handler) {
       this.handlers.push({ event, fn } as EventHandler<unknown>);
+    } else {
+      throw new Error("Listener already registered for event: " + event.type);
     }
-    throw new Error("Listener already registered for event: " + event.type);
   }
 
   protected unlisten(type: Event<object>) {
     // TODO(danielglasgow): Implmenent
   }
 
-  sendDown<T>(event: Event<T>, data: T) {
+  /*sendDown<T>(event: Event<T>, data: T) {
     for (const child of this.children) {
       child.handleDown(event, data);
     }
@@ -49,9 +50,10 @@ export abstract class Controller {
     if (!result) {
       this.sendDown(event, data);
     }
-  }
+  }*/
 
   sendUp<T>(event: Event<T>, data: T) {
+    console.log("SEND UP: " + event.type + " data: " + data);
     if (!this.parent) {
       throw new Error(
         "Base controller received unhandled event: " + event.type

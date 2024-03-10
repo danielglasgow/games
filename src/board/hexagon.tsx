@@ -33,6 +33,7 @@ import {
   isResource
 } from "../server/types";
 import { Vertex } from "./vertex";
+import { BoardControl } from "./control";
 
 const NUMBER_SIZE_PCT = 50;
 
@@ -70,8 +71,8 @@ interface HexState {
   isBlocked: false;
 }
 
-export function Hexagon(props: HexProps, parent: Controller) {
-  const [state, setState] = useState({ isBlocked: false });
+export function Hexagon(props: HexProps, parent: BoardControl|null) {
+  // const [state, setState] = useState({ isBlocked: false });
   const layout = props.layout;
   if (isResource(layout)) {
     return HexContainer(
@@ -94,7 +95,7 @@ export function Hexagon(props: HexProps, parent: Controller) {
 function HexContainer(
   content: JSX.Element,
   location: HexId,
-  parent: Controller
+  parent: BoardControl|null
 ) {
   return (
     <div
@@ -109,8 +110,8 @@ function HexContainer(
       }}
     >
       {content}
-      {Vertex({ location: { location, side: "LEFT" } }, parent)}
-      {Vertex({ location: { location, side: "RIGHT" } }, parent)}
+      {Vertex({ location: { location, side: "LEFT" } })}
+      {Vertex({ location: { location, side: "RIGHT" } })}
     </div>
   );
 }

@@ -1,23 +1,22 @@
 import { useState } from "react";
-import { Controller } from "../control/controller";
+import { AppControl } from "../control";
 import { BoardLayout } from "../server/types";
+import { BoardControl } from "./control";
 import { HEX_OVERALY_OFFSET_VMIN } from "./dimensions";
 import { Hexagon, Spacer } from "./hexagon";
-import { BoardControl } from "./control";
 
 interface BoardProps {
-  layout: BoardLayout
+  layout: BoardLayout;
 }
 
-export default function Board(props: BoardProps, parent: Controller) {
-  const [state, setState] = useState({});
-  const control = new BoardControl(parent, state, setState);
+export default function Board(props: BoardProps) {
+  // const [state, setState] = useState({});
+  //const control = new BoardControl(parent, state, setState);
+  //parent.registerBoardControl(control);
   const totalColumns = 7;
   const midPoint = Math.floor(totalColumns / 2);
   const columns = props.layout.columns.map((column, index) => {
-    const hexagons = column.map((layout) =>
-      Hexagon({layout}, control)
-    );
+    const hexagons = column.map((layout) => Hexagon({ layout }, null));
     return (
       <div
         style={{ display: "flex", flexDirection: "column" }}

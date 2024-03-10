@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
+import { AppControl } from "./control";
 import { Controller } from "./control/controller";
 
 interface SidePanelState {
@@ -34,9 +35,10 @@ export class SidePanelControl extends Controller {
 }
 
 
-export function SidePanel(parent: Controller) {
+export function SidePanel(app: AppControl) {
   const [state, setState] = useState({showConfirm: false});
-  const control = new SidePanelControl(parent, state, setState);
+  const control = new SidePanelControl(app, state, setState);
+  app.registerSidepanelControl(control);
   return (
     <div
       id="actionbox"
@@ -48,7 +50,7 @@ export function SidePanel(parent: Controller) {
         float: "right",
       }}
     >
-      <button style={{ margin: "10px", width: "20vmin" }}>
+      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => app.startInitialPlacement()}>
         Place Settlement
       </button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place City</button>

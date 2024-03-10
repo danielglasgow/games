@@ -22,34 +22,42 @@ export class PlacementAction {
   }
 }
 
-
-export class ConfirmSettlement implements Action<VertexId, void|GameState> {
-  constructor(
-    private readonly board: BoardControl,
-    private readonly sidepanel: SidePanelControl
-  ) {}
+export class ConfirmSettlement implements Action<VertexId, void | GameState> {
+  constructor(private readonly sidepanel: SidePanelControl) {}
 
   async execute(input: VertexId) {
     const result = await this.sidepanel.confirmResult();
     if (result) {
       return SERVER.placeSettlement(input);
-    } 
-    return Promise.resolve();
+    }
   }
 }
 
-export class PlaceInitialSettlement implements Action<never, VertexId> {
-  constructor(
-    private readonly board: BoardControl,
-    private readonly state: GameState
-  ) {}
+export class PlaceInitialSettlement implements Action<null, VertexId> {
+  constructor(private readonly board: BoardControl) {}
 
   async execute() {
-    this.board.showVertexIndicators(legalPlacementVertecies(this.state));
+    console.log("EXECUTE ACTION");
+    this.board.showAllVertexIndicators();
+    console.log("DONE BOARD SHOW VERTEX INDEICATORS");
+    //this.board.showVertexIndicators(legalPlacementVertecies(this.state));
     const vertexId = await this.board.nextVertexSelection();
+    console.log("NEXT VERTEX SELECTION");
     this.board.setBuilding(vertexId, "SETTLEMENT");
+    this.board.hideVertexIndicators();
     return Promise.resolve(vertexId);
   }
+}
+
+export function chain<T>(
+  startAction: Action<null, T>,
+  endAction: Action<T, void | GameState>
+) {
+  const execute = async () => {
+    const result = await startAction.execute(null);
+    return endAction.execute(result);
+  };
+  return { execute };
 }
 
 function legalPlacementVertecies(state: GameState) {

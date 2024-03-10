@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { Controller, events } from "../control/controller";
 import { Building, VertexId } from "../server/types";
+import { BoardControl } from "./control";
 import {
   HEX_DIAMETER_VMIN,
   HEX_HEIGHT_VMIN,
@@ -54,52 +55,43 @@ export class VertexControl extends Controller {
   }
 }
 
-export function Vertex(props: VertexProps, parent: Controller) {
-  const [state, setState] = useState({ showIndicator: false });
-  const control = new VertexControl(parent, state, setState);
-  if (state.showIndicator) {
-    switch (props.location.side) {
-      case "LEFT":
-        return (
-          <div
-            style={{
-              borderRadius: "50%",
-              border: "1px solid black",
-              background: "transparent",
-              width: PLACEMENT_INDICATOR_VMIN + "vmin",
-              height: PLACEMENT_INDICATOR_VMIN + "vmin",
-              left:
-                LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-              top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-              position: "absolute",
-              zIndex: 1,
-            }}
-            onClick={() =>
-              control.sendUp(events.VERTEX_CLICKED, props.location)
-            }
-          ></div>
-        );
-      case "RIGHT":
-        return (
-          <div
-            style={{
-              borderRadius: "50%",
-              border: "1px solid black",
-              background: "transparent",
-              width: PLACEMENT_INDICATOR_VMIN + "vmin",
-              height: PLACEMENT_INDICATOR_VMIN + "vmin",
-              left:
-                RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-              top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-              position: "absolute",
-              zIndex: 1,
-            }}
-            onClick={() =>
-              control.sendUp(events.VERTEX_CLICKED, props.location)
-            }
-          ></div>
-        );
-    }
+export function Vertex(props: VertexProps) {
+  const [showIndicator, setShowIndicator] = useState(false);
+  switch (props.location.side) {
+    case "LEFT":
+      return (
+        <div
+          style={{
+            borderRadius: "50%",
+            border: showIndicator ? "1px solid black" :  "1px solid transparent",
+            background: "transparent",
+            width: PLACEMENT_INDICATOR_VMIN + "vmin",
+            height: PLACEMENT_INDICATOR_VMIN + "vmin",
+            left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            position: "absolute",
+            zIndex: 1,
+          }}
+          onClick={() => setShowIndicator(!showIndicator)}
+        ></div>
+      );
+    case "RIGHT":
+      return (
+        <div
+          style={{
+            borderRadius: "50%",
+            border: showIndicator ? "1px solid black" :  "1px solid transparent",
+            background: "transparent",
+            width: PLACEMENT_INDICATOR_VMIN + "vmin",
+            height: PLACEMENT_INDICATOR_VMIN + "vmin",
+            left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            position: "absolute",
+            zIndex: 1,
+          }}
+          onClick={() => setShowIndicator(!showIndicator)}
+        ></div>
+      );
   }
   return <div></div>;
 }
