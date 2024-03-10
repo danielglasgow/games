@@ -2,12 +2,12 @@ import {
   HEX_DIAMETER_VMIN,
   HEX_HEIGHT_VMIN,
   HEX_OVERALY_OFFSET_VMIN,
-  HEX_SIDE_VMIN,
   ROAD_SPACING_VMIN,
 } from "./dimensions";
 
 import brick from "../assets/brick.svg";
 import desert from "../assets/desert.svg";
+import ocean from "../assets/ocean.svg";
 import ore from "../assets/ore.svg";
 import sheep from "../assets/sheep.svg";
 import wheat from "../assets/wheat.svg";
@@ -23,20 +23,19 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import { Number, Resource, Tile } from "./types";
+import {
+  HexId,
+  HexLayout,
+  Number,
+  Resource,
+  VertexId,
+  isResource,
+} from "../server/types";
+import { BoardControl } from "./control";
+import { Vertex } from "./vertex";
+import { GameState } from "../game/state";
 
 const NUMBER_SIZE_PCT = 50;
-const PLACEMENT_INDICATOR_PCT = 20;
-
-const PLACEMENT_INDICATOR_VMIN =
-  HEX_DIAMETER_VMIN * (PLACEMENT_INDICATOR_PCT / 100);
-
-const Y_FUGDE = (HEX_DIAMETER_VMIN / HEX_HEIGHT_VMIN - 1) / 2; // I have no idea why this works, but it does
-const VERTEX_Y_OFFSET = -1 * (ROAD_SPACING_VMIN / 2) - Y_FUGDE;
-
-const X_FUGDE = 1 - HEX_HEIGHT_VMIN / HEX_DIAMETER_VMIN; // I have no idea why this works, but it does
-const LEFT_VERTEX_X_OFFSET = HEX_SIDE_VMIN / 2 - ROAD_SPACING_VMIN - X_FUGDE;
-const RIGHT_VERTEX_X_OFFSET = HEX_DIAMETER_VMIN - LEFT_VERTEX_X_OFFSET;
 
 const RESOURCE_BACKGROUNDS: { [key in Resource]: string } = {
   ORE: ore,
@@ -64,20 +63,41 @@ export function Spacer({ ratio }: { ratio: number }) {
   return <div style={{ height: height + "vmin" }}></div>;
 }
 
-export function Hexagon({ tile }: { tile: Tile }) {
-  if (tile === "DESERT") {
-    return Hex({ background: desert });
-  } else {
-    return Hex({
-      background: RESOURCE_BACKGROUNDS[tile.resource],
-      number: NUMBER_BACKGROUNDS[tile.number],
-    });
-  }
+interface HexProps {
+  layout: HexLayout;
+  state: GameState;
 }
 
-function Hex(content: { background: string; number?: string }) {
+interface HexState {
+  isBlocked: false;
+}
+
+export function Hexagon(props: HexProps) {
+  // const [state, setState] = useState({ isBlocked: false });
+  const layout = props.layout;
+  const state = props.state;
+  if (isResource(layout)) {
+    return HexContainer(
+      ResourceHex({
+        background: RESOURCE_BACKGROUNDS[layout.resource],
+        number: NUMBER_BACKGROUNDS[layout.number],
+      }),
+      layout.location,
+      state
+    );
+  }
+  if (layout.geography === "DESERT") {
+    return HexContainer(HexBackground(desert), layout.location, state);
+  } else if (layout.geography === "OCEAN") {
+    return HexContainer(HexBackground(ocean), layout.location, state);
+  }
+  throw new Error("Unknown hex type");
+}
+
+function HexContainer(content: JSX.Element, location: HexId, state: GameState) {
   return (
     <div
+      key={`${location.row},${location.col}`}
       style={{
         position: "relative",
         marginTop: ROAD_SPACING_VMIN / 2 + "vmin",
@@ -87,36 +107,26 @@ function Hex(content: { background: string; number?: string }) {
         marginLeft: HEX_OVERALY_OFFSET_VMIN + "vmin",
       }}
     >
-      {InnerHex(content)}
+      {content}
+      <Vertex location={new VertexId(location, "LEFT")} state={state} />
+      <Vertex location={new VertexId(location, "RIGHT")} state={state} />
     </div>
   );
 }
 
-function InnerHex({
+function ResourceHex({
   background,
   number,
 }: {
   background: string;
-  number?: string;
+  number: string;
 }) {
-  if (number) {
-    return (
-      <div>
-        {HexBackground(background)}
-        {HexNumber(number)}
-        {LeftVertexIndicator()}
-        {RightVertexIndicator()}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        {HexBackground(background)}
-        {LeftVertexIndicator()}
-        {RightVertexIndicator()}
-      </div>
-    );
-  }
+  return (
+    <div>
+      {HexBackground(background)}
+      {HexNumber(number)}
+    </div>
+  );
 }
 
 function HexNumber(src: string) {
@@ -151,41 +161,5 @@ function HexBackground(src: string) {
         }}
       />
     </div>
-  );
-}
-
-function LeftVertexIndicator() {
-  return (
-    <div
-      style={{
-        borderRadius: "50%",
-        border: "1px solid black",
-        background: "transparent",
-        width: PLACEMENT_INDICATOR_VMIN + "vmin",
-        height: PLACEMENT_INDICATOR_VMIN + "vmin",
-        left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-        top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-        position: "absolute",
-        zIndex: 1,
-      }}
-    ></div>
-  );
-}
-
-function RightVertexIndicator() {
-  return (
-    <div
-      style={{
-        borderRadius: "50%",
-        border: "1px solid black",
-        background: "transparent",
-        width: PLACEMENT_INDICATOR_VMIN + "vmin",
-        height: PLACEMENT_INDICATOR_VMIN + "vmin",
-        left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-        top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-        position: "absolute",
-        zIndex: 1,
-      }}
-    ></div>
   );
 }

@@ -1,9 +1,34 @@
+import { useState } from "react";
+import { AppControl } from "../control";
+import { BoardLayout } from "../server/types";
+import { BoardControl } from "./control";
 import { HEX_OVERALY_OFFSET_VMIN } from "./dimensions";
-import { Hexagon, Spacer } from "./tile";
-import { BoardLayout, TileType } from "./types";
+import { Hexagon, Spacer } from "./hexagon";
+import { GameState } from "../game/state";
 
+interface BoardProps {
+  layout: BoardLayout;
+  state: GameState;
+}
 
-export default function Board({ layout }: { layout: BoardLayout }) {
+export default function Board(props: BoardProps) {
+  // const [state, setState] = useState({});
+  //const control = new BoardControl(parent, state, setState);
+  //parent.registerBoardControl(control);
+  const totalColumns = 7;
+  const midPoint = Math.floor(totalColumns / 2);
+  const columns = props.layout.columns.map((column, index) => {
+    const hexagons = column.map((layout) => <Hexagon layout={layout} state={props.state} />);
+    return (
+      <div
+        style={{ display: "flex", flexDirection: "column" }}
+        key={`column${index}`}
+      >
+        {Spacer({ ratio: Math.abs(midPoint - index) * 0.5 })}
+        {hexagons}
+      </div>
+    );
+  });
   return (
     <div id="board">
       <div
@@ -13,39 +38,7 @@ export default function Board({ layout }: { layout: BoardLayout }) {
           paddingLeft: HEX_OVERALY_OFFSET_VMIN * -1 + "vmin",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {Spacer({ ratio: 1 })}
-          {Hexagon({ tile: layout.tiles[0] })}
-          {Hexagon({ tile: layout.tiles[1] })}
-          {Hexagon({ tile: layout.tiles[2] })}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {Spacer({ ratio: 0.5 })}
-          {Hexagon({ tile: layout.tiles[3] })}
-          {Hexagon({ tile: layout.tiles[4] })}
-          {Hexagon({ tile: layout.tiles[5] })}
-          {Hexagon({ tile: layout.tiles[6] })}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {Hexagon({ tile: layout.tiles[7] })}
-          {Hexagon({ tile: layout.tiles[8] })}
-          {Hexagon({ tile: layout.tiles[9] })}
-          {Hexagon({ tile: layout.tiles[10] })}
-          {Hexagon({ tile: layout.tiles[11] })}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {Spacer({ ratio: 0.5 })}
-          {Hexagon({ tile: layout.tiles[12] })}
-          {Hexagon({ tile: layout.tiles[13] })}
-          {Hexagon({ tile: layout.tiles[14] })}
-          {Hexagon({ tile: layout.tiles[15] })}
-        </div>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          {Spacer({ ratio: 1 })}
-          {Hexagon({ tile: layout.tiles[16] })}
-          {Hexagon({ tile: layout.tiles[17] })}
-          {Hexagon({ tile: layout.tiles[18] })}
-        </div>
+        {columns}
       </div>
     </div>
   );
