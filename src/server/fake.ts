@@ -21,6 +21,7 @@ class FakeServer {
     state.settlements.push({
       location: vertex,
       player: this.state.turn.player,
+      name: "SETTLEMENT",
     });
     this.state = state;
     return Promise.resolve(this.state);

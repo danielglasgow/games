@@ -85,11 +85,12 @@ export function newRandomGame(): GameState {
     turn: {
       player: "player1",
       phase: "PLACE_SETTLEMENT",
+      pendingPlacements: {}
     },
     players: [playerYou(1), playerOther(2), playerOther(3), playerOther(4)],
     robber: desert.location,
-    settlements: [],
-    cities: [],
+    settlements: [{name: "SETTLEMENT", location: new VertexId({row: 3, col: 3}, "LEFT"), player: "player1"}],
+    cities: [{name: "CITY", location: new VertexId({row: 3, col: 4}, "LEFT"), player: "player1"}],
     roads: [],
   };
 }
@@ -186,9 +187,9 @@ class BoardLayoutBuilder {
     return Object.freeze(column);
   }
 
-  private pushVertex(location: HexId) {
-    this.vertices.push({ location, side: "LEFT" });
-    this.vertices.push({ location, side: "RIGHT" });
+  private pushVertex(hex: HexId) {
+    this.vertices.push(new VertexId(hex, "LEFT" ));
+    this.vertices.push(new VertexId(hex, "RIGHT" ));
   }
 }
 
@@ -201,7 +202,7 @@ function isSameLocation(a: { location: HexId }, b: { location: HexId }) {
 }
 
 function getAdjacentHexes(vertex: VertexId): { location: HexId }[] {
-  const { row, col } = vertex.location;
+  const { row, col } = vertex.hex;
   switch (vertex.side) {
     case "LEFT":
       return [

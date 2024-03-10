@@ -2,7 +2,7 @@ import {
   HEX_DIAMETER_VMIN,
   HEX_HEIGHT_VMIN,
   HEX_OVERALY_OFFSET_VMIN,
-  ROAD_SPACING_VMIN
+  ROAD_SPACING_VMIN,
 } from "./dimensions";
 
 import brick from "../assets/brick.svg";
@@ -13,7 +13,6 @@ import sheep from "../assets/sheep.svg";
 import wheat from "../assets/wheat.svg";
 import wood from "../assets/wood.svg";
 
-import { useState } from "react";
 import eight from "../assets/numbers/eight.svg";
 import eleven from "../assets/numbers/eleven.svg";
 import five from "../assets/numbers/five.svg";
@@ -24,16 +23,17 @@ import ten from "../assets/numbers/ten.svg";
 import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
-import { Controller } from "../control/controller";
 import {
   HexId,
   HexLayout,
   Number,
   Resource,
-  isResource
+  VertexId,
+  isResource,
 } from "../server/types";
-import { Vertex } from "./vertex";
 import { BoardControl } from "./control";
+import { Vertex } from "./vertex";
+import { GameState } from "../game/state";
 
 const NUMBER_SIZE_PCT = 50;
 
@@ -65,15 +65,17 @@ export function Spacer({ ratio }: { ratio: number }) {
 
 interface HexProps {
   layout: HexLayout;
+  state: GameState;
 }
 
 interface HexState {
   isBlocked: false;
 }
 
-export function Hexagon(props: HexProps, parent: BoardControl|null) {
+export function Hexagon(props: HexProps) {
   // const [state, setState] = useState({ isBlocked: false });
   const layout = props.layout;
+  const state = props.state;
   if (isResource(layout)) {
     return HexContainer(
       ResourceHex({
@@ -81,22 +83,18 @@ export function Hexagon(props: HexProps, parent: BoardControl|null) {
         number: NUMBER_BACKGROUNDS[layout.number],
       }),
       layout.location,
-      parent
+      state
     );
   }
   if (layout.geography === "DESERT") {
-    return HexContainer(HexBackground(desert), layout.location, parent);
+    return HexContainer(HexBackground(desert), layout.location, state);
   } else if (layout.geography === "OCEAN") {
-    return HexContainer(HexBackground(ocean), layout.location, parent);
+    return HexContainer(HexBackground(ocean), layout.location, state);
   }
   throw new Error("Unknown hex type");
 }
 
-function HexContainer(
-  content: JSX.Element,
-  location: HexId,
-  parent: BoardControl|null
-) {
+function HexContainer(content: JSX.Element, location: HexId, state: GameState) {
   return (
     <div
       key={`${location.row},${location.col}`}
@@ -110,8 +108,8 @@ function HexContainer(
       }}
     >
       {content}
-      {Vertex({ location: { location, side: "LEFT" } })}
-      {Vertex({ location: { location, side: "RIGHT" } })}
+      <Vertex location={new VertexId(location, "LEFT")} state={state} />
+      <Vertex location={new VertexId(location, "RIGHT")} state={state} />
     </div>
   );
 }

@@ -58,5 +58,5 @@ export class BoardControl extends Controller {
 }
 
 function toString(vertex: VertexId) {
-  return `${vertex.location.row},${vertex.location.col}:${vertex.side}`;
+  return `${vertex.hex.row},${vertex.hex.col}:${vertex.side}`;
 }

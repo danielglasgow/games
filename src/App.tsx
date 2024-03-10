@@ -4,6 +4,7 @@ import Board from "./board";
 import { AppControl } from "./control";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
+import { GameState } from "./game/state";
 
 function App({ app }: { app: AppState }) {
   const [state, setState] = useState(app);
@@ -23,7 +24,7 @@ function App({ app }: { app: AppState }) {
             alignItems: "center",
           }}
         >
-          {Board({ layout: state.server.board })}
+          <Board layout={app.server.board} state={new GameState(app.server)} /> 
         </div>
         {SidePanel(control)}
       </div>

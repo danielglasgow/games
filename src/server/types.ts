@@ -39,11 +39,13 @@ export interface PlayerYou extends Player {
 export interface GameTurn {
   player: string;
   phase: "ROLL" | "BUILD";
+  pendingPlacements: ReadonlyArray<Settlement | City | Road>;
 }
 
 export interface InitialPlacementTurn {
   player: string;
   phase: "PLACE_SETTLEMENT" | "PLACE_ROAD";
+  pendingPlacements: Readonly<{ settlement?: VertexId; road?: EdgeId }>;
 }
 
 export type Resource = "ORE" | "BRICK" | "WHEAT" | "WOOD" | "SHEEP";
@@ -104,16 +106,19 @@ export interface Port {
 }
 
 export interface Settlement {
+  readonly name: "SETTLEMENT";
   readonly location: VertexId;
   readonly player: string;
 }
 
 export interface City {
+  readonly name: "CITY";
   readonly location: VertexId;
   readonly player: string;
 }
 
 export interface Road {
+  readonly type: "ROAD";
   readonly location: EdgeId;
   readonly player: string;
 }
@@ -123,16 +128,51 @@ export interface HexId {
   readonly col: number;
 }
 
-export interface VertexId {
-  readonly location: HexId;
-  readonly side: "LEFT" | "RIGHT";
+export class VertexId {
+  constructor(readonly hex: HexId, readonly side: "LEFT" | "RIGHT") {}
+
+  equals(other?: VertexId|EdgeId) {
+    if (!other || isEdge(other)) {
+      return false;
+    }
+    return (
+      this.hex.row === other.hex.row &&
+      this.hex.col === other.hex.col &&
+      this.side === other.side
+    );
+  }
+
+  toString() {
+    return `${this.hex.row},${this.hex.col}:${this.side}`;
+  }
+}
+
+export function isEdge(x: VertexId | EdgeId): x is EdgeId {
+  return (x as EdgeId).position != undefined;
+}
+
+export function isVertex(x: VertexId | EdgeId): x is VertexId {
+  return (x as VertexId).side != undefined;
 }
 
 export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
 
 export type Building = "SETTLEMENT" | "CITY";
 
-export interface EdgeId {}
+export class EdgeId {
+  constructor(readonly hex: HexId, readonly position: "INNER" | "OUTER") {}
+
+  equals(other?: VertexId|EdgeId) {
+    if (!other || isVertex(other)) {
+      return false;
+    }
+    return (
+      this.hex.row === other.hex.row &&
+      this.hex.col === other.hex.col &&
+      this.position === other.position
+    );
+  }
+}
 
 export interface BoardLayout {
   readonly columns: ReadonlyArray<ReadonlyArray<HexLayout>>;
@@ -140,3 +180,12 @@ export interface BoardLayout {
   readonly ports: ReadonlyArray<Port>;
 }
 
+export function isInitialPlacementTurn(
+  turn: GameTurn | InitialPlacementTurn
+): turn is InitialPlacementTurn {
+  return typeof (turn as InitialPlacementTurn).pendingPlacements === "object";
+}
+
+export function isRoad(x: Settlement | City | Road): x is Road {
+  return isEdge((x as Road).location);
+}
