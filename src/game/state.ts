@@ -7,7 +7,7 @@ import {
   Settlement,
   VertexId,
   isInitialPlacementTurn,
-  isRoad,
+  isRoad
 } from "../server/types";
 
 export class GameState {
@@ -71,25 +71,6 @@ export class GameState {
       return turn.phase === "PLACE_SETTLEMENT";
     }
     return turn.pendingAction === "PLACE_SETTLEMENT";
-  }
-}
-
-function getAdjacentVertices(vertex: VertexId) {
-  const row = vertex.hex.row;
-  const col = vertex.hex.col;
-  switch (vertex.side) {
-    case "LEFT":
-      return [
-        new VertexId(new HexId({ row: row, col: col }), "RIGHT"),
-        new VertexId(new HexId({ row: row, col: col - 1 }), "RIGHT"),
-        new VertexId(new HexId({ row: row - 1, col: col - 1 }), "RIGHT"),
-      ];
-    case "RIGHT":
-      return [
-        new VertexId(new HexId({ row: row, col: col }), "LEFT"),
-        new VertexId(new HexId({ row: row, col: col + 1 }), "LEFT"),
-        new VertexId(new HexId({ row: row - 1, col: col + 1 }), "LEFT"),
-      ];
   }
 }
 
