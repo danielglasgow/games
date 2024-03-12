@@ -2,6 +2,7 @@ import {
   Building,
   City,
   GameTurn,
+  HexId,
   GameState as ServerGameState,
   Settlement,
   VertexId,
@@ -42,6 +43,53 @@ export class GameState {
         building.location.equals(vertex)
       )?.name;
     }
+  }
+
+  isBuildingAllowed(vertex: VertexId) {
+    if (vertex.hex.row === 0) {
+      return false;
+    }
+    if (vertex.hex.col === 0) {
+      return vertex.side === "RIGHT";
+    }
+    if (vertex.hex.col === this.state.board.columns.length - 1) {
+      return vertex.side === "LEFT";
+    }
+    return vertex.adjacentVertecies().every((v) => this.isEmpty(v));
+  }
+
+  isEmpty(vertex: VertexId) {
+    return (
+      this.state.cities.every((c) => !c.location.equals(vertex)) &&
+      this.state.settlements.every((s) => !s.location.equals(vertex))
+    );
+  }
+
+  isVertexPlacementActive() {
+    const turn = this.state.turn;
+    if (isInitialPlacementTurn(turn)) {
+      return turn.phase === "PLACE_SETTLEMENT";
+    }
+    return turn.pendingAction === "PLACE_SETTLEMENT";
+  }
+}
+
+function getAdjacentVertices(vertex: VertexId) {
+  const row = vertex.hex.row;
+  const col = vertex.hex.col;
+  switch (vertex.side) {
+    case "LEFT":
+      return [
+        new VertexId(new HexId({ row: row, col: col }), "RIGHT"),
+        new VertexId(new HexId({ row: row, col: col - 1 }), "RIGHT"),
+        new VertexId(new HexId({ row: row - 1, col: col - 1 }), "RIGHT"),
+      ];
+    case "RIGHT":
+      return [
+        new VertexId(new HexId({ row: row, col: col }), "LEFT"),
+        new VertexId(new HexId({ row: row, col: col + 1 }), "LEFT"),
+        new VertexId(new HexId({ row: row - 1, col: col + 1 }), "LEFT"),
+      ];
   }
 }
 

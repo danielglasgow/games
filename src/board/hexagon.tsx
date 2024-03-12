@@ -31,7 +31,6 @@ import {
   VertexId,
   isResource,
 } from "../server/types";
-import { BoardControl } from "./control";
 import { Vertex } from "./vertex";
 import { GameState } from "../game/state";
 

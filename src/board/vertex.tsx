@@ -1,5 +1,4 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Controller } from "../control/controller";
 import { Building as BuildingType, VertexId } from "../server/types";
 import {
   HEX_DIAMETER_VMIN,
@@ -10,6 +9,7 @@ import {
 
 import city from "../assets/buildings/blue/city.svg";
 import settlement from "../assets/buildings/blue/settlement.svg";
+import { CONTROL_MANAGER } from "../control/manager";
 import { GameState } from "../game/state";
 
 const PLACEMENT_INDICATOR_PCT = 20;
@@ -34,45 +34,59 @@ export interface VertexProps {
 
 export interface OpenVertexProps extends VertexProps {
   building?: BuildingType;
+  state: GameState;
 }
 
 export interface BuiltVertexProps extends VertexProps {
   building: BuildingType;
 }
 
-export class VertexControl extends Controller {
+export class VertexControl {
   constructor(
-    parent: Controller,
-    private readonly state: VertexState,
-    private readonly setState: Dispatch<SetStateAction<VertexState>>
+    private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
+    private readonly setBuildingState: Dispatch<SetStateAction<BuildingType|undefined>>
   ) {
-    super(parent);
   }
 
   showIndicator() {
-    this.setState({ ...this.state, showIndicator: true });
+    this.setShowIndicator(true);
   }
 
   hideIndicator() {
-    this.setState({ ...this.state, showIndicator: false });
+    this.setShowIndicator(false);
   }
 
   setBuilding(building: BuildingType) {
-    this.setState({ ...this.state, building });
+    this. setBuildingState(building);
   }
 
   removeBuilding() {
-    this.setState({ ...this.state, building: undefined });
+    this. setBuildingState(undefined);
   }
 }
 
-export function Vertex(props: {location: VertexId, state: GameState}) {
+export function Vertex(props: { location: VertexId; state: GameState }) {
   const fixedBuilding = props.state.getFixedBuilding(props.location);
   if (fixedBuilding) {
     return <BuiltVertex location={props.location} building={fixedBuilding} />;
   }
-  return <OpenVertex location={props.location}/>;
-
+  const pendingBuilding = props.state.getPendingBuilding(props.location);
+  if (!props.state.isBuildingAllowed(props.location)) {
+    if (pendingBuilding) {
+      throw new Error(
+        "Illegal board state, found pending building on vertex where building is not legal: " +
+          props.location
+      );
+    }
+    return ClosedVertex(props.location);
+  }
+  return (
+    <OpenVertex
+      location={props.location}
+      building={pendingBuilding}
+      state={props.state}
+    />
+  );
 }
 
 function BuiltVertex(props: BuiltVertexProps) {
@@ -114,8 +128,12 @@ function BuiltVertex(props: BuiltVertexProps) {
   }
 }
 
-function OpenVertex(props: VertexProps) {
-  const [showIndicator, setShowIndicator] = useState(false);
+function OpenVertex(props: OpenVertexProps) {
+  const [showIndicator, setShowIndicator] = useState(
+    !props.building && props.state.isVertexPlacementActive()
+  );
+  const [building, setBuilding] = useState(props.building);
+  CONTROL_MANAGER.registerOpenVertex(props.location, new VertexControl(setShowIndicator, setBuilding));
   switch (props.location.side) {
     case "LEFT":
       return (
@@ -131,7 +149,7 @@ function OpenVertex(props: VertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
-          onClick={() => setShowIndicator(!showIndicator)}
+          onClick={() => CONTROL_MANAGER.showAdjacentVertexIndicators(props.location)}
         ></div>
       );
     case "RIGHT":
@@ -148,7 +166,42 @@ function OpenVertex(props: VertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
-          onClick={() => setShowIndicator(!showIndicator)}
+          onClick={() => CONTROL_MANAGER.showAdjacentVertexIndicators(props.location)}
+        ></div>
+      );
+  }
+}
+
+function ClosedVertex(location: VertexId) {
+  switch (location.side) {
+    case "LEFT":
+      return (
+        <div
+          style={{
+            borderRadius: "50%",
+            background: "transparent",
+            width: PLACEMENT_INDICATOR_VMIN + "vmin",
+            height: PLACEMENT_INDICATOR_VMIN + "vmin",
+            left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            position: "absolute",
+            zIndex: 1,
+          }}
+        ></div>
+      );
+    case "RIGHT":
+      return (
+        <div
+          style={{
+            borderRadius: "50%",
+            background: "transparent",
+            width: PLACEMENT_INDICATOR_VMIN + "vmin",
+            height: PLACEMENT_INDICATOR_VMIN + "vmin",
+            left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            position: "absolute",
+            zIndex: 1,
+          }}
         ></div>
       );
   }

@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import { AppControl } from "./control";
 import { Controller } from "./control/controller";
+import { CONTROL_MANAGER } from "./control/manager";
 
 interface SidePanelState {
   showConfirm: boolean;
@@ -50,11 +51,14 @@ export function SidePanel(app: AppControl) {
         float: "right",
       }}
     >
-      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => app.startInitialPlacement()}>
+      <button style={{ margin: "10px", width: "20vmin" }}>
         Place Settlement
       </button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place City</button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place Road</button>
+      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => CONTROL_MANAGER.hideAllVertexIndicators()}>
+        Turn Off All Vertex Indicators 
+      </button>
       <div>
         {state.showConfirm && (
           <button
