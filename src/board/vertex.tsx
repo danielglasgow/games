@@ -10,7 +10,7 @@ import {
 import city from "../assets/buildings/blue/city.svg";
 import settlement from "../assets/buildings/blue/settlement.svg";
 import { CONTROL_MANAGER } from "../control/manager";
-import { GameContext, GameState } from "../game/state";
+import { GameContext } from "../game/context";
 
 const PLACEMENT_INDICATOR_PCT = 20;
 const PLACEMENT_INDICATOR_VMIN =
@@ -43,9 +43,10 @@ export interface BuiltVertexProps extends VertexProps {
 export class VertexControl {
   constructor(
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
-    private readonly setBuildingState: Dispatch<SetStateAction<BuildingType|undefined>>
-  ) {
-  }
+    private readonly setBuildingState: Dispatch<
+      SetStateAction<BuildingType | undefined>
+    >
+  ) {}
 
   showIndicator() {
     this.setShowIndicator(true);
@@ -56,11 +57,11 @@ export class VertexControl {
   }
 
   setBuilding(building: BuildingType) {
-    this. setBuildingState(building);
+    this.setBuildingState(building);
   }
 
   removeBuilding() {
-    this. setBuildingState(undefined);
+    this.setBuildingState(undefined);
   }
 }
 
@@ -80,12 +81,7 @@ export function Vertex(props: VertexProps) {
     }
     return ClosedVertex(props.location);
   }
-  return (
-    <OpenVertex
-      location={props.location}
-      building={pendingBuilding}
-    />
-  );
+  return <OpenVertex location={props.location} building={pendingBuilding} />;
 }
 
 function BuiltVertex(props: BuiltVertexProps) {
@@ -103,6 +99,7 @@ function BuiltVertex(props: BuiltVertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
+          onClick={() => CONTROL_MANAGER.onVertexClick(props.location)}
         >
           {Building(props.building)}
         </div>
@@ -120,6 +117,7 @@ function BuiltVertex(props: BuiltVertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
+          onClick={() => CONTROL_MANAGER.onVertexClick(props.location)}
         >
           {Building(props.building)}
         </div>
@@ -133,7 +131,10 @@ function OpenVertex(props: OpenVertexProps) {
     !props.building && game.isVertexPlacementActive()
   );
   const [building, setBuilding] = useState(props.building);
-  CONTROL_MANAGER.registerOpenVertex(props.location, new VertexControl(setShowIndicator, setBuilding));
+  CONTROL_MANAGER.registerOpenVertex(
+    props.location,
+    new VertexControl(setShowIndicator, setBuilding)
+  );
   switch (props.location.side) {
     case "LEFT":
       return (
@@ -149,8 +150,10 @@ function OpenVertex(props: OpenVertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
-          onClick={() => CONTROL_MANAGER.showAdjacentVertexIndicators(props.location)}
-        ></div>
+          onClick={() => CONTROL_MANAGER.onVertexClick(props.location)}
+        >
+          {building && Building(building)}
+        </div>
       );
     case "RIGHT":
       return (
@@ -166,8 +169,10 @@ function OpenVertex(props: OpenVertexProps) {
             position: "absolute",
             zIndex: 1,
           }}
-          onClick={() => CONTROL_MANAGER.showAdjacentVertexIndicators(props.location)}
-        ></div>
+          onClick={() => CONTROL_MANAGER.onVertexClick(props.location)}
+        >
+          {building && Building(building)}
+        </div>
       );
   }
 }

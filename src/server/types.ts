@@ -43,10 +43,32 @@ export interface GameTurn {
   pendingAction: "PLACE_SETTLEMENT" | "PLACE_CITY" | "PLACE_ROAD" | "CONFIRM";
 }
 
-export interface InitialPlacementTurn {
+export type InitialPlacementTurn =
+  | OneInitialPlacementTurn
+  | TwoInitialPlacementTurn;
+
+interface PendingPlacements {
+  readonly settlement?: Settlement;
+  readonly road?: Road;
+}
+
+export interface OneInitialPlacementTurn {
   player: string;
   phase: "PLACE_SETTLEMENT" | "PLACE_ROAD" | "CONFIRM";
-  pendingPlacements: Readonly<{ settlement?: VertexId; road?: EdgeId }>;
+  pendingPlacements: PendingPlacements;
+}
+
+export interface TwoInitialPlacementTurn {
+  player: string;
+  phase:
+    | "PLACE_SETTLEMENT"
+    | "PLACE_SETTLEMENT_OR_ROAD"
+    | "PLACE_ROAD"
+    | "CONFIRM";
+  pendingPlacements: Readonly<{
+    first?: PendingPlacements;
+    second?: PendingPlacements;
+  }>;
 }
 
 export type Resource = "ORE" | "BRICK" | "WHEAT" | "WOOD" | "SHEEP";
@@ -165,7 +187,7 @@ export class VertexId {
     switch (this.side) {
       // TODO(danielglasgow):
       // [sameHex(), adjacentColumnUpHex(), adjacentColumnDownHex()]
-      // Probably can reuse with vertex logic: e.g for vertex get a hex, 
+      // Probably can reuse with vertex logic: e.g for vertex get a hex,
       // and then ask for it's left or right vertex.
       case "LEFT":
         return [
@@ -279,6 +301,12 @@ export function isInitialPlacementTurn(
   turn: GameTurn | InitialPlacementTurn
 ): turn is InitialPlacementTurn {
   return typeof (turn as InitialPlacementTurn).pendingPlacements === "object";
+}
+
+export function isGameTurn(
+  turn: GameTurn | InitialPlacementTurn
+): turn is GameTurn {
+  return Array.isArray((turn as GameTurn).pendingPlacements);
 }
 
 export function isRoad(x: Settlement | City | Road): x is Road {

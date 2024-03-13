@@ -90,18 +90,18 @@ export function newRandomGame(): GameState {
     players: [playerYou(1), playerOther(2), playerOther(3), playerOther(4)],
     robber: desert.location,
     settlements: [
-      {
-        name: "SETTLEMENT",
-        location: new VertexId(new HexId({ row: 3, col: 3 }), "LEFT"),
-        player: "player1",
-      },
+    //  {
+    //    name: "SETTLEMENT",
+    //    location: new VertexId(new HexId({ row: 3, col: 3 }), "LEFT"),
+    //    player: "player1",
+    //  },
     ],
     cities: [
-      {
-        name: "CITY",
-        location: new VertexId(new HexId({ row: 3, col: 4 }), "LEFT"),
-        player: "player1",
-      },
+     // {
+     //   name: "CITY",
+     //   location: new VertexId(new HexId({ row: 3, col: 4 }), "LEFT"),
+     //   player: "player1",
+     // },
     ],
     roads: [],
   };

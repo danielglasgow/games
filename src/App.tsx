@@ -2,9 +2,10 @@ import { useState } from "react";
 import "./App.css";
 import Board from "./board";
 import { AppControl } from "./control";
-import { GameContext, createGameState } from "./game/state";
+import {createGameState } from "./game/state";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
+import { GameContext } from "./game/context";
 
 function App({ app }: { app: AppState }) {
   const [state, setState] = useState(app);

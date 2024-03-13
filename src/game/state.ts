@@ -10,6 +10,7 @@ import {
   isInitialPlacementTurn,
   isRoad
 } from "../server/types";
+import { Turn } from "./turn";
 
 
 export interface GameState {
@@ -20,6 +21,13 @@ export interface GameState {
   isVertexPlacementActive(): boolean;
 }
 
+export function createGameState(state: ServerGameState): GameState {
+  return new ServerGameStateWrapper(state);
+}
+
+export function createUninitializedGameState(): GameState {
+  return new UninitiliazedGameState();
+}
 
 class UninitiliazedGameState implements GameState {
   getFixedBuilding(vertex: VertexId): Building | undefined {
@@ -40,14 +48,12 @@ class UninitiliazedGameState implements GameState {
 }
 
 
-export const GameContext  = createContext(new UninitiliazedGameState());
-
-export function createGameState(state: ServerGameState): GameState {
-  return new ServerGameStateWrapper(state);
-}
-
 class ServerGameStateWrapper implements GameState {
   constructor(private readonly state: ServerGameState) {}
+
+  getTurn() {
+    return this.state.turn;
+  }
 
   getFixedBuilding(vertex: VertexId): Building | undefined {
     const settlement = this.state.settlements.find((s) =>
@@ -69,16 +75,7 @@ class ServerGameStateWrapper implements GameState {
   }
 
   getPendingBuilding(vertex: VertexId): Building | undefined {
-    const turn = this.state.turn;
-    if (isInitialPlacementTurn(turn)) {
-      if (vertex.equals(turn.pendingPlacements.settlement)) {
-        return "SETTLEMENT";
-      }
-    } else {
-      return getPendingBuildings(turn).find((building) =>
-        building.location.equals(vertex)
-      )?.name;
-    }
+    return new Turn(this.state).getPendingPlacement(vertex)?.name;
   }
 
   isBuildingAllowed(vertex: VertexId) {
