@@ -85,12 +85,24 @@ export function newRandomGame(): GameState {
     turn: {
       player: "player1",
       phase: "PLACE_SETTLEMENT",
-      pendingPlacements: {}
+      pendingPlacements: {},
     },
     players: [playerYou(1), playerOther(2), playerOther(3), playerOther(4)],
     robber: desert.location,
-    settlements: [{name: "SETTLEMENT", location: new VertexId({row: 3, col: 3}, "LEFT"), player: "player1"}],
-    cities: [{name: "CITY", location: new VertexId({row: 3, col: 4}, "LEFT"), player: "player1"}],
+    settlements: [
+    //  {
+    //    name: "SETTLEMENT",
+    //    location: new VertexId(new HexId({ row: 3, col: 3 }), "LEFT"),
+    //    player: "player1",
+    //  },
+    ],
+    cities: [
+     // {
+     //   name: "CITY",
+     //   location: new VertexId(new HexId({ row: 3, col: 4 }), "LEFT"),
+     //   player: "player1",
+     // },
+    ],
     roads: [],
   };
 }
@@ -150,7 +162,7 @@ class BoardLayoutBuilder {
   }
 
   private push(hex: ResourceNumber | Ocean | Desert) {
-    const location = { row: this.currentRow, col: this.currentColumnIndex };
+    const location = new HexId({ row: this.currentRow, col: this.currentColumnIndex });
     if (hex == "DESERT") {
       const desert: DesertLayout = { geography: "DESERT", location };
       this.currentColumn.push(desert);
@@ -180,7 +192,7 @@ class BoardLayoutBuilder {
   private oceanColumn(columnIndex: number, size: number) {
     const column: HexLayout[] = [];
     for (let i = 0; i < size; i++) {
-      const location = { row: i, col: columnIndex };
+      const location = new HexId({ row: i, col: columnIndex });
       column.push({ geography: "OCEAN", location });
       this.pushVertex(location);
     }
@@ -188,35 +200,17 @@ class BoardLayoutBuilder {
   }
 
   private pushVertex(hex: HexId) {
-    this.vertices.push(new VertexId(hex, "LEFT" ));
-    this.vertices.push(new VertexId(hex, "RIGHT" ));
+    this.vertices.push(new VertexId(hex, "LEFT"));
+    this.vertices.push(new VertexId(hex, "RIGHT"));
   }
 }
 
 function isAdjacent(hex: { location: HexId }, vertex: VertexId) {
-  return getAdjacentHexes(vertex).some((adjHex) => isSameLocation(adjHex, hex));
+  return vertex.adjacentHexes().some((adjHex) => isSameLocation(adjHex, hex));
 }
 
 function isSameLocation(a: { location: HexId }, b: { location: HexId }) {
   return a.location.row === b.location.row && a.location.col === b.location.col;
-}
-
-function getAdjacentHexes(vertex: VertexId): { location: HexId }[] {
-  const { row, col } = vertex.hex;
-  switch (vertex.side) {
-    case "LEFT":
-      return [
-        { location: { row: row, col: col } },
-        { location: { row: row, col: col - 1 } },
-        { location: { row: row - 1, col: col } },
-      ];
-    case "RIGHT":
-      return [
-        { location: { row: row, col: col } },
-        { location: { row: row - 1, col: col } },
-        { location: { row: row, col: col + 1 } },
-      ];
-  }
 }
 
 function playerYou(n: number): PlayerYou {
