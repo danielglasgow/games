@@ -6,13 +6,17 @@ import {createGameState } from "./game/state";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
 import { GameContext } from "./game/context";
+import { CONTROL_MANAGER } from "./control/manager";
 
 function App({ app }: { app: AppState }) {
   const [state, setState] = useState(app);
+  const game = createGameState(state.server);
+  CONTROL_MANAGER.registerSync(setState);
+  CONTROL_MANAGER.registerGame(game);
   const control = new AppControl(state, setState);
   return (
     <div>
-      <GameContext.Provider value={createGameState(app.server)}>
+      <GameContext.Provider value={game}>
         <div
           style={{
             display: "flex",
@@ -26,7 +30,7 @@ function App({ app }: { app: AppState }) {
               alignItems: "center",
             }}
           >
-            <Board layout={app.server.board} />
+            <Board layout={state.server.board} />
           </div>
           {SidePanel(control)}
         </div>

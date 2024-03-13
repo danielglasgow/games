@@ -1,21 +1,15 @@
-import { createContext } from "react";
 import {
   Building,
-  City,
-  GameTurn,
-  HexId,
   GameState as ServerGameState,
-  Settlement,
   VertexId,
-  isInitialPlacementTurn,
-  isRoad
+  isInitialPlacementTurn
 } from "../server/types";
 import { Turn } from "./turn";
-
 
 export interface GameState {
   getFixedBuilding(vertex: VertexId): Building | undefined;
   getPendingBuilding(vertex: VertexId): Building | undefined;
+  getVertecies(): ReadonlyArray<VertexId>;
   isBuildingAllowed(vertex: VertexId): boolean;
   isEmpty(vertex: VertexId): boolean;
   isVertexPlacementActive(): boolean;
@@ -36,6 +30,9 @@ class UninitiliazedGameState implements GameState {
   getPendingBuilding(vertex: VertexId): Building | undefined {
     throw new Error("GameState not initialized");
   }
+  getVertecies(): VertexId[] {
+    throw new Error("GameState not initialized");
+  }
   isBuildingAllowed(vertex: VertexId): boolean {
     throw new Error("GameState not initialized");
   }
@@ -46,7 +43,6 @@ class UninitiliazedGameState implements GameState {
     throw new Error("GameState not initialized");
   }
 }
-
 
 class ServerGameStateWrapper implements GameState {
   constructor(private readonly state: ServerGameState) {}
@@ -78,6 +74,10 @@ class ServerGameStateWrapper implements GameState {
     return new Turn(this.state).getPendingPlacement(vertex)?.name;
   }
 
+  getVertecies() {
+    return this.state.board.vertices;
+  }
+
   isBuildingAllowed(vertex: VertexId) {
     if (vertex.hex.row === 0) {
       return false;
@@ -105,14 +105,4 @@ class ServerGameStateWrapper implements GameState {
     }
     return turn.pendingAction === "PLACE_SETTLEMENT";
   }
-}
-
-function getPendingBuildings(turn: GameTurn) {
-  const buildings: Array<Settlement | City> = [];
-  for (const building of turn.pendingPlacements) {
-    if (!isRoad(building)) {
-      buildings.push(building);
-    }
-  }
-  return buildings;
 }

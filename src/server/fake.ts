@@ -24,7 +24,12 @@ class FakeServer {
       name: "SETTLEMENT",
     });
     this.state = state;
-    return Promise.resolve(this.state);
+    const promise = new Promise<GameState>(resolve => {
+      setTimeout(() => {
+        resolve(this.state);
+      }, 1000);
+    })
+    return promise;
   }
 
   // TODO: Make Async
