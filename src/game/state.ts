@@ -1,3 +1,4 @@
+import { createContext } from "react";
 import {
   Building,
   City,
@@ -10,7 +11,42 @@ import {
   isRoad
 } from "../server/types";
 
-export class GameState {
+
+export interface GameState {
+  getFixedBuilding(vertex: VertexId): Building | undefined;
+  getPendingBuilding(vertex: VertexId): Building | undefined;
+  isBuildingAllowed(vertex: VertexId): boolean;
+  isEmpty(vertex: VertexId): boolean;
+  isVertexPlacementActive(): boolean;
+}
+
+
+class UninitiliazedGameState implements GameState {
+  getFixedBuilding(vertex: VertexId): Building | undefined {
+    throw new Error("GameState not initialized");
+  }
+  getPendingBuilding(vertex: VertexId): Building | undefined {
+    throw new Error("GameState not initialized");
+  }
+  isBuildingAllowed(vertex: VertexId): boolean {
+    throw new Error("GameState not initialized");
+  }
+  isEmpty(vertex: VertexId): boolean {
+    throw new Error("GameState not initialized");
+  }
+  isVertexPlacementActive(): boolean {
+    throw new Error("GameState not initialized");
+  }
+}
+
+
+export const GameContext  = createContext(new UninitiliazedGameState());
+
+export function createGameState(state: ServerGameState): GameState {
+  return new ServerGameStateWrapper(state);
+}
+
+class ServerGameStateWrapper implements GameState {
   constructor(private readonly state: ServerGameState) {}
 
   getFixedBuilding(vertex: VertexId): Building | undefined {

@@ -5,14 +5,13 @@ import { GameState } from "../game/state";
 
 interface BoardProps {
   layout: BoardLayout;
-  state: GameState;
 }
 
 export default function Board(props: BoardProps) {
   const totalColumns = 7;
   const midPoint = Math.floor(totalColumns / 2);
   const columns = props.layout.columns.map((column, index) => {
-    const hexagons = column.map((layout) => <Hexagon layout={layout} state={props.state} key={layout.location.toString()}/>);
+    const hexagons = column.map((layout) => <Hexagon layout={layout}  key={layout.location.toString()}/>);
     return (
       <div
         style={{ display: "flex", flexDirection: "column" }}

@@ -32,7 +32,6 @@ import {
   isResource,
 } from "../server/types";
 import { Vertex } from "./vertex";
-import { GameState } from "../game/state";
 
 const NUMBER_SIZE_PCT = 50;
 
@@ -64,7 +63,6 @@ export function Spacer({ ratio }: { ratio: number }) {
 
 interface HexProps {
   layout: HexLayout;
-  state: GameState;
 }
 
 interface HexState {
@@ -74,26 +72,24 @@ interface HexState {
 export function Hexagon(props: HexProps) {
   // const [state, setState] = useState({ isBlocked: false });
   const layout = props.layout;
-  const state = props.state;
   if (isResource(layout)) {
     return HexContainer(
       ResourceHex({
         background: RESOURCE_BACKGROUNDS[layout.resource],
         number: NUMBER_BACKGROUNDS[layout.number],
       }),
-      layout.location,
-      state
+      layout.location
     );
   }
   if (layout.geography === "DESERT") {
-    return HexContainer(HexBackground(desert), layout.location, state);
+    return HexContainer(HexBackground(desert), layout.location);
   } else if (layout.geography === "OCEAN") {
-    return HexContainer(HexBackground(ocean), layout.location, state);
+    return HexContainer(HexBackground(ocean), layout.location);
   }
   throw new Error("Unknown hex type");
 }
 
-function HexContainer(content: JSX.Element, location: HexId, state: GameState) {
+function HexContainer(content: JSX.Element, location: HexId) {
   return (
     <div
       key={`${location.row},${location.col}`}
@@ -107,8 +103,8 @@ function HexContainer(content: JSX.Element, location: HexId, state: GameState) {
       }}
     >
       {content}
-      <Vertex location={new VertexId(location, "LEFT")} state={state} />
-      <Vertex location={new VertexId(location, "RIGHT")} state={state} />
+      <Vertex location={new VertexId(location, "LEFT")} />
+      <Vertex location={new VertexId(location, "RIGHT")} />
     </div>
   );
 }

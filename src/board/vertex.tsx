@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Building as BuildingType, VertexId } from "../server/types";
 import {
   HEX_DIAMETER_VMIN,
@@ -10,7 +10,7 @@ import {
 import city from "../assets/buildings/blue/city.svg";
 import settlement from "../assets/buildings/blue/settlement.svg";
 import { CONTROL_MANAGER } from "../control/manager";
-import { GameState } from "../game/state";
+import { GameContext, GameState } from "../game/state";
 
 const PLACEMENT_INDICATOR_PCT = 20;
 const PLACEMENT_INDICATOR_VMIN =
@@ -34,7 +34,6 @@ export interface VertexProps {
 
 export interface OpenVertexProps extends VertexProps {
   building?: BuildingType;
-  state: GameState;
 }
 
 export interface BuiltVertexProps extends VertexProps {
@@ -65,13 +64,14 @@ export class VertexControl {
   }
 }
 
-export function Vertex(props: { location: VertexId; state: GameState }) {
-  const fixedBuilding = props.state.getFixedBuilding(props.location);
+export function Vertex(props: VertexProps) {
+  const game = useContext(GameContext);
+  const fixedBuilding = game.getFixedBuilding(props.location);
   if (fixedBuilding) {
     return <BuiltVertex location={props.location} building={fixedBuilding} />;
   }
-  const pendingBuilding = props.state.getPendingBuilding(props.location);
-  if (!props.state.isBuildingAllowed(props.location)) {
+  const pendingBuilding = game.getPendingBuilding(props.location);
+  if (!game.isBuildingAllowed(props.location)) {
     if (pendingBuilding) {
       throw new Error(
         "Illegal board state, found pending building on vertex where building is not legal: " +
@@ -84,7 +84,6 @@ export function Vertex(props: { location: VertexId; state: GameState }) {
     <OpenVertex
       location={props.location}
       building={pendingBuilding}
-      state={props.state}
     />
   );
 }
@@ -129,8 +128,9 @@ function BuiltVertex(props: BuiltVertexProps) {
 }
 
 function OpenVertex(props: OpenVertexProps) {
+  const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(
-    !props.building && props.state.isVertexPlacementActive()
+    !props.building && game.isVertexPlacementActive()
   );
   const [building, setBuilding] = useState(props.building);
   CONTROL_MANAGER.registerOpenVertex(props.location, new VertexControl(setShowIndicator, setBuilding));
