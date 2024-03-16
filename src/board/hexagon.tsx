@@ -24,6 +24,7 @@ import three from "../assets/numbers/three.svg";
 import twelve from "../assets/numbers/twelve.svg";
 import two from "../assets/numbers/two.svg";
 import {
+  EdgeId,
   HexId,
   HexLayout,
   Number,
@@ -31,7 +32,7 @@ import {
   VertexId,
   isResource,
 } from "../server/types";
-import { LeftEdge, RightEdge, TopEdge } from "./edge";
+import { Edge } from "./edge";
 import { Vertex } from "./vertex";
 
 const NUMBER_SIZE_PCT = 50;
@@ -106,9 +107,9 @@ function HexContainer(content: JSX.Element, location: HexId) {
       {content}
       <Vertex location={new VertexId(location, "LEFT")} />
       <Vertex location={new VertexId(location, "RIGHT")} />
-      <TopEdge></TopEdge>
-      <LeftEdge></LeftEdge>
-      <RightEdge></RightEdge>
+      <Edge location={new EdgeId(location, "TOP")} />
+      <Edge location={new EdgeId(location, "LEFT")} />
+      <Edge location={new EdgeId(location, "RIGHT")} />
     </div>
   );
 }

@@ -1,26 +1,63 @@
+import { Dispatch, SetStateAction, useState } from "react";
 import {
-  HEX_DIAMETER_VMIN,
   HEX_HEIGHT_VMIN,
   HEX_SIDE_VMIN,
-  INDICATOR_Y_HEX_TOP,
   INDICATOR_X_HEX_LEFT,
+  INDICATOR_X_HEX_MIDDLE,
   INDICATOR_X_HEX_RIGHT,
+  INDICATOR_Y_HEX_TOP,
   PLACEMENT_INDICATOR_VMIN,
   ROAD_OVERLAY_OFFSET_VMIN,
   ROAD_SPACING_VMIN,
-  INDICATOR_X_HEX_MIDDLE,
 } from "./dimensions";
+import { EdgeId, VertexId } from "../server/types";
+import { VertexControl } from "./vertex";
+import { CONTROL_MANAGER } from "../control/manager";
 
 // Once the indicator centered along the left / right edge of the hex box,
 // how much to shift it to get it into position
 const X_OFFSET = HEX_SIDE_VMIN / 4 - ROAD_OVERLAY_OFFSET_VMIN / 2;
 
-export function TopEdge() {
+interface EdgeProps {
+  location: EdgeId;
+}
+
+
+export class EdgeControl {
+  constructor(
+    private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
+  ) {}
+
+  showIndicator() {
+    this.setShowIndicator(true);
+  }
+
+  hideIndicator() {
+    this.setShowIndicator(false);
+  }
+}
+
+
+export function Edge(props: EdgeProps) {
+  const [showIndicator, setShowIndicator] = useState(false);
+  const control = new EdgeControl(setShowIndicator);
+  CONTROL_MANAGER.registerEdge(props.location, control);
+  switch (props.location.position) {
+    case "TOP":
+      return TopEdge(showIndicator);
+    case "LEFT":
+      return LeftEdge(showIndicator);
+    case "RIGHT":
+      return RightEdge(showIndicator);
+  } 
+}
+
+export function TopEdge(showIndicator: boolean) {
   return (
     <div
       style={{
         borderRadius: "50%",
-        border: "1px solid black",
+        border: showIndicator ? "1px solid black" : "1px solid transparent",
         background: "transparent",
         position: "absolute",
         zIndex: 1,
@@ -33,12 +70,12 @@ export function TopEdge() {
   );
 }
 
-export function LeftEdge() {
+function LeftEdge(showIndicator: boolean) {
   return (
     <div
       style={{
         borderRadius: "50%",
-        border: "1px solid black",
+        border: showIndicator ? "1px solid black" : "1px solid transparent",
         background: "transparent",
         position: "absolute",
         zIndex: 1,
@@ -51,12 +88,12 @@ export function LeftEdge() {
   );
 }
 
-export function RightEdge() {
+function RightEdge(showIndicator: boolean) {
   return (
     <div
       style={{
         borderRadius: "50%",
-        border: "1px solid black",
+        border: showIndicator ? "1px solid black" : "1px solid transparent",
         background: "transparent",
         position: "absolute",
         zIndex: 1,

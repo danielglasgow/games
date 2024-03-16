@@ -31,6 +31,9 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
       this.control.hideAllVertexIndicators();
       this.control.getVertex(vertex).setBuilding("SETTLEMENT");
       this.settlement = vertex;
+      for (const edge of vertex.adjacentEdges()) {
+        this.control.getEdge(edge).showIndicator();
+      }
     } else if (this.settlement.equals(vertex)) {
       this.settlement = undefined;
       this.control.getVertex(vertex).removeBuilding();
@@ -41,6 +44,9 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
           }
           this.control.getVertex(vertex)?.showIndicator();
         }
+      }
+      for (const edge of vertex.adjacentEdges()) {
+        this.control.getEdge(edge).hideIndicator();
       }
     }
   }

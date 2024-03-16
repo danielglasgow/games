@@ -1,13 +1,15 @@
 import { VertexControl } from "../board/vertex";
 import { GameState, createUninitializedGameState } from "../game/state";
-import { VertexId } from "../server/types";
+import { EdgeId, VertexId } from "../server/types";
 import {SERVER} from "../server/fake";
 import { Dispatch, SetStateAction } from "react";
 import { AppState } from "../types";
 import { InitialPlacementOrchestrator, TurnOrchestrator, createUninitializedTurnOrchestrator } from "../game/orchestration";
+import { EdgeControl } from "../board/edge";
 
 export class ControlManager {
   private readonly vertecies: { [k: string]: VertexControl } = {};
+  private readonly edges: {[k: string]: EdgeControl} = {};
   private game: GameState = createUninitializedGameState(); 
   private sync: Dispatch<SetStateAction<AppState>> = () => {
     throw new Error("Cannot sync app state with server, app state not initialized.");
@@ -23,6 +25,10 @@ export class ControlManager {
     this.vertecies[location.toString()] = control;
   }
 
+  registerEdge(location: EdgeId, control: EdgeControl) {
+    this.edges[location.toString()] = control;
+  }
+
   registerSync(sync: Dispatch<SetStateAction<AppState>>) {
     this.sync = sync;
   }
@@ -35,6 +41,10 @@ export class ControlManager {
 
   getVertex(vertex: VertexId) {
     return this.vertecies[vertex.toString()];
+  }
+
+  getEdge(edge: EdgeId) {
+    return this.edges[edge.toString()]
   }
 
   // Consider making this event driven

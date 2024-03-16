@@ -212,6 +212,14 @@ export class VertexId {
     ];
   }
 
+  adjacentEdges() {
+    return [
+      new EdgeId(this.hex, "TOP"),
+      new EdgeId(this.hex, this.side),
+      new EdgeId(this.adjacentColumnDown().hex, this.oppositeSide()),
+    ]
+  }
+
   private sameHexOtherSide() {
     const hex = new HexId({ row: this.hex.row, col: this.hex.col });
     return new VertexId(hex, this.oppositeSide());
@@ -277,7 +285,10 @@ export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
 export type Building = "SETTLEMENT" | "CITY";
 
 export class EdgeId {
-  constructor(readonly hex: HexId, readonly position: "INNER" | "OUTER") {}
+  constructor(
+    readonly hex: HexId,
+    readonly position: "LEFT" | "RIGHT" | "TOP"
+  ) {}
 
   equals(other?: VertexId | EdgeId) {
     if (!other || isVertex(other)) {
@@ -288,6 +299,10 @@ export class EdgeId {
       this.hex.col === other.hex.col &&
       this.position === other.position
     );
+  }
+
+  toString() {
+    return `${this.hex.row},${this.hex.col}:${this.position}`;
   }
 }
 
