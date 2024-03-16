@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
+import { CONTROL_MANAGER } from "../control/manager";
 import {
   HEX_HEIGHT_VMIN,
   HEX_SIDE_VMIN,
@@ -10,16 +11,14 @@ import {
   ROAD_OVERLAY_OFFSET_VMIN,
   ROAD_SPACING_VMIN,
 } from "./dimensions";
-import { EdgeId, VertexId } from "../server/types";
-import { VertexControl } from "./vertex";
-import { CONTROL_MANAGER } from "../control/manager";
+import { EdgeLocation } from "./location";
 
 // Once the indicator centered along the left / right edge of the hex box,
 // how much to shift it to get it into position
 const X_OFFSET = HEX_SIDE_VMIN / 4 - ROAD_OVERLAY_OFFSET_VMIN / 2;
 
 interface EdgeProps {
-  location: EdgeId;
+  location: EdgeLocation;
 }
 
 

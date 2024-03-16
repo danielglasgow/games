@@ -1,11 +1,11 @@
 import { VertexControl } from "../board/vertex";
 import { GameState, createUninitializedGameState } from "../game/state";
-import { EdgeId, VertexId } from "../server/types";
 import {SERVER} from "../server/fake";
 import { Dispatch, SetStateAction } from "react";
 import { AppState } from "../types";
 import { InitialPlacementOrchestrator, TurnOrchestrator, createUninitializedTurnOrchestrator } from "../game/orchestration";
 import { EdgeControl } from "../board/edge";
+import { EdgeLocation, VertexLocation } from "../board";
 
 export class ControlManager {
   private readonly vertecies: { [k: string]: VertexControl } = {};
@@ -22,11 +22,11 @@ export class ControlManager {
   }
 
   registerVertex(control: VertexControl) {
-    this.vertecies[control.location.toString()] = control;
+    this.vertecies[control.location.key()] = control;
   }
 
-  registerEdge(location: EdgeId, control: EdgeControl) {
-    this.edges[location.toString()] = control;
+  registerEdge(location: EdgeLocation, control: EdgeControl) {
+    this.edges[location.key()] = control;
   }
 
   registerSync(sync: Dispatch<SetStateAction<AppState>>) {
@@ -44,39 +44,39 @@ export class ControlManager {
     }
   }
 
-  getVertex(vertex: VertexId) {
-    return this.vertecies[vertex.toString()];
+  getVertex(vertex: VertexLocation) {
+    return this.vertecies[vertex.key()];
   }
 
-  getEdge(edge: EdgeId) {
-    return this.edges[edge.toString()]
+  getEdge(edge: EdgeLocation) {
+    return this.edges[edge.key()]
   }
 
   // Consider making this event driven
-  onVertexClick(vertex: VertexId) {
-    console.log("VERTEX CLICKED: " + vertex.toString());
+  onVertexClick(vertex: VertexLocation) {
+    console.log("VERTEX CLICKED: " + vertex.key());
     this.turn.onVertexClicked(vertex);
    
   }
 
   // In my latest thinking each "action" is atomic whereas placing a settlement 
   // without confimration just notifies the server which can in turn notify other clients.
-  private notifyPendingSettelment(vertex: VertexId) {
+  private notifyPendingSettelment(vertex: VertexLocation) {
     // TODO(danielglasgow)
   }
 
-  private async commit(vertex: VertexId) {
-    const newState =  await SERVER.placeSettlement(vertex); 
+  private async commit(vertex: VertexLocation) {
+    const newState =  await SERVER.placeSettlement(vertex);
     console.log("GOT SERVER STATE UPDATE");
     console.log(newState.settlements);
     // TODO(danielglasgow): Compare states and show warning if they do not match
     this.sync({server: newState, isLocked: false});
   }
 
-  showAdjacentVertexIndicators(vertex: VertexId) {
+  showAdjacentVertexIndicators(vertex: VertexLocation) {
     this.hideAllVertexIndicators();
     for (const v of vertex.adjacentVertecies()) {
-      const control = this.vertecies[v.toString()];
+      const control = this.vertecies[v.key()];
       if (control) {
         control.showIndicator();
       }

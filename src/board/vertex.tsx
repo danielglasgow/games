@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { CONTROL_MANAGER } from "../control/manager";
 import { GameContext } from "../game/context";
-import { Building as BuildingType, VertexId } from "../server/types";
+import { Building as BuildingType } from "../server/types";
 import { Building } from "./building";
 import {
   HEX_SIDE_VMIN,
@@ -11,6 +11,7 @@ import {
   PLACEMENT_INDICATOR_VMIN,
   ROAD_SPACING_VMIN,
 } from "./dimensions";
+import { VertexLocation } from "./location";
 
 const X_OFFSET = HEX_SIDE_VMIN / 4 + ROAD_SPACING_VMIN;
 
@@ -20,7 +21,7 @@ export interface VertexState {
 }
 
 export interface VertexProps {
-  location: VertexId;
+  location: VertexLocation;
 }
 
 interface OpenVertexProps extends VertexProps {
@@ -32,7 +33,7 @@ interface BuiltVertexProps extends VertexProps {
 }
 
 export interface VertexControl {
-  readonly location: VertexId;
+  readonly location: VertexLocation;
   showIndicator(): void;
   hideIndicator(): void;
   setBuilding(building: BuildingType): void;
@@ -46,7 +47,7 @@ interface VertexControlInternal {
 class OpenVertexControl implements VertexControl, VertexControlInternal {
   private readonly type = "OPEN_VERTEX";
   constructor(
-    public readonly location: VertexId,
+    public readonly location: VertexLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
     private readonly setBuildingState: Dispatch<
       SetStateAction<BuildingType | undefined>
@@ -81,7 +82,7 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
 class BuiltVertexControl implements VertexControl, VertexControlInternal {
   private readonly type = "BUILT_VERTEX";
   constructor(
-    public readonly location: VertexId,
+    public readonly location: VertexLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>
   ) {}
 
@@ -95,13 +96,13 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
 
   setBuilding() {
     throw new Error(
-      "Cannot place building on built vertex: " + this.location.toString()
+      "Cannot place building on built vertex: " + this.location.key()
     );
   }
 
   removeBuilding() {
     throw new Error(
-      "Cannot remove building from built vertex: " + this.location.toString()
+      "Cannot remove building from built vertex: " + this.location.key()
     );
   }
 

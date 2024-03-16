@@ -1,18 +1,18 @@
+import { EdgeLocation, VertexLocation } from "../board";
 import { ControlManager } from "../control/manager";
-import { EdgeId, VertexId } from "../server/types";
 import { GameState } from "./state";
 
 export interface TurnOrchestrator {
-  onVertexClicked(vertex: VertexId): void;
-  onEdgeClicked(edge: EdgeId): void;
+  onVertexClicked(vertex: VertexLocation): void;
+  onEdgeClicked(edge: EdgeLocation): void;
   startOrContinue(): void;
 }
 
 class UninitializedTurnOrchestrator implements TurnOrchestrator {
-  onVertexClicked(vertex: VertexId): void {
+  onVertexClicked(vertex: VertexLocation): void {
     throw new Error("Turn orchestrator not initialized");
   }
-  onEdgeClicked(edge: EdgeId): void {
+  onEdgeClicked(edge: EdgeLocation): void {
     throw new Error("Turn orchestrator not initialized");
   }
   startOrContinue(): void {
@@ -27,14 +27,14 @@ export function createUninitializedTurnOrchestrator(): TurnOrchestrator {
 export class InitialPlacementOrchestrator implements TurnOrchestrator {
   constructor(private control: ControlManager, private game: GameState) {}
 
-  private settlement?: VertexId;
-  private road?: EdgeId;
+  private settlement?: VertexLocation;
+  private road?: EdgeLocation;
 
   startOrContinue() {
     this.showAllOpenVertecies();
   }
 
-  onVertexClicked(vertex: VertexId) {
+  onVertexClicked(vertex: VertexLocation) {
     if (!this.settlement) {
       this.control.hideAllVertexIndicators();
       this.control.getVertex(vertex).setBuilding("SETTLEMENT");
@@ -52,7 +52,7 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
     }
   }
 
-  onEdgeClicked(edge: EdgeId) {
+  onEdgeClicked(edge: EdgeLocation) {
     if (!this.road) {
       this.road = edge;
     } else if (this.road.equals(edge)) {
