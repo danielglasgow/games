@@ -31,6 +31,7 @@ import {
   VertexId,
   isResource,
 } from "../server/types";
+import { LeftEdge, RightEdge, TopEdge } from "./edge";
 import { Vertex } from "./vertex";
 
 const NUMBER_SIZE_PCT = 50;
@@ -105,6 +106,9 @@ function HexContainer(content: JSX.Element, location: HexId) {
       {content}
       <Vertex location={new VertexId(location, "LEFT")} />
       <Vertex location={new VertexId(location, "RIGHT")} />
+      <TopEdge></TopEdge>
+      <LeftEdge></LeftEdge>
+      <RightEdge></RightEdge>
     </div>
   );
 }

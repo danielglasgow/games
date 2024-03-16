@@ -2,9 +2,12 @@ import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { Building as BuildingType, VertexId } from "../server/types";
 import {
   HEX_DIAMETER_VMIN,
-  HEX_HEIGHT_VMIN,
   HEX_SIDE_VMIN,
-  ROAD_SPACING_VMIN,
+  INDICATOR_Y_HEX_TOP,
+  INDICATOR_X_HEX_LEFT,
+  INDICATOR_X_HEX_RIGHT,
+  PLACEMENT_INDICATOR_VMIN,
+  ROAD_SPACING_VMIN
 } from "./dimensions";
 
 import city from "../assets/buildings/blue/city.svg";
@@ -12,16 +15,7 @@ import settlement from "../assets/buildings/blue/settlement.svg";
 import { CONTROL_MANAGER } from "../control/manager";
 import { GameContext } from "../game/context";
 
-const PLACEMENT_INDICATOR_PCT = 20;
-const PLACEMENT_INDICATOR_VMIN =
-  HEX_DIAMETER_VMIN * (PLACEMENT_INDICATOR_PCT / 100);
-
-const Y_FUGDE = (HEX_DIAMETER_VMIN / HEX_HEIGHT_VMIN - 1) / 2; // I have no idea why this works, but it does
-const VERTEX_Y_OFFSET = -1 * (ROAD_SPACING_VMIN / 2) - Y_FUGDE;
-
-const X_FUGDE = 1 - HEX_HEIGHT_VMIN / HEX_DIAMETER_VMIN; // I have no idea why this works, but it does
-const LEFT_VERTEX_X_OFFSET = HEX_SIDE_VMIN / 2 - ROAD_SPACING_VMIN - X_FUGDE;
-const RIGHT_VERTEX_X_OFFSET = HEX_DIAMETER_VMIN - LEFT_VERTEX_X_OFFSET;
+const X_OFFSET = HEX_SIDE_VMIN / 4 + ROAD_SPACING_VMIN;
 
 export interface VertexState {
   readonly showIndicator: boolean;
@@ -94,8 +88,8 @@ function BuiltVertex(props: BuiltVertexProps) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_LEFT + X_OFFSET + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
@@ -112,8 +106,8 @@ function BuiltVertex(props: BuiltVertexProps) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_RIGHT - X_OFFSET + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
@@ -145,8 +139,8 @@ function OpenVertex(props: OpenVertexProps) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_LEFT + X_OFFSET + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
@@ -164,8 +158,8 @@ function OpenVertex(props: OpenVertexProps) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_RIGHT - X_OFFSET + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
@@ -187,8 +181,8 @@ function ClosedVertex(location: VertexId) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: LEFT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_LEFT + X_OFFSET + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
@@ -202,8 +196,8 @@ function ClosedVertex(location: VertexId) {
             background: "transparent",
             width: PLACEMENT_INDICATOR_VMIN + "vmin",
             height: PLACEMENT_INDICATOR_VMIN + "vmin",
-            left: RIGHT_VERTEX_X_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
-            top: VERTEX_Y_OFFSET - PLACEMENT_INDICATOR_VMIN / 2 + "vmin",
+            top: INDICATOR_Y_HEX_TOP - ROAD_SPACING_VMIN / 2 + "vmin",
+            left: INDICATOR_X_HEX_RIGHT - X_OFFSET + "vmin",
             position: "absolute",
             zIndex: 1,
           }}
