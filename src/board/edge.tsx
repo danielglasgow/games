@@ -24,6 +24,7 @@ interface EdgeProps {
 
 export class EdgeControl {
   constructor(
+    readonly location: EdgeLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
   ) {}
 
@@ -39,8 +40,8 @@ export class EdgeControl {
 
 export function Edge(props: EdgeProps) {
   const [showIndicator, setShowIndicator] = useState(false);
-  const control = new EdgeControl(setShowIndicator);
-  CONTROL_MANAGER.registerEdge(props.location, control);
+  const control = new EdgeControl(props.location, setShowIndicator);
+  CONTROL_MANAGER.registerEdge(control);
   switch (props.location.position) {
     case "TOP":
       return TopEdge(showIndicator);

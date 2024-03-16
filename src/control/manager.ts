@@ -25,8 +25,8 @@ export class ControlManager {
     this.vertecies[control.location.key()] = control;
   }
 
-  registerEdge(location: EdgeLocation, control: EdgeControl) {
-    this.edges[location.key()] = control;
+  registerEdge(control: EdgeControl) {
+    this.edges[control.location.key()] = control;
   }
 
   registerSync(sync: Dispatch<SetStateAction<AppState>>) {

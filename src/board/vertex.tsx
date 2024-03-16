@@ -15,12 +15,7 @@ import { VertexLocation } from "./location";
 
 const X_OFFSET = HEX_SIDE_VMIN / 4 + ROAD_SPACING_VMIN;
 
-export interface VertexState {
-  readonly showIndicator: boolean;
-  readonly building?: BuildingType;
-}
-
-export interface VertexProps {
+interface VertexProps {
   location: VertexLocation;
 }
 
