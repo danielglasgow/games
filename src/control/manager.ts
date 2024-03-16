@@ -21,8 +21,8 @@ export class ControlManager {
     this.turn = new InitialPlacementOrchestrator(this, game);
   }
 
-  registerOpenVertex(location: VertexId, control: VertexControl) {
-    this.vertecies[location.toString()] = control;
+  registerVertex(control: VertexControl) {
+    this.vertecies[control.location.toString()] = control;
   }
 
   registerEdge(location: EdgeId, control: EdgeControl) {
@@ -31,6 +31,11 @@ export class ControlManager {
 
   registerSync(sync: Dispatch<SetStateAction<AppState>>) {
     this.sync = sync;
+  }
+
+  startOrContinueTurn() {
+    console.log("START OR CONTINUE");
+    this.turn.startOrContinue();
   }
 
   hideAllVertexIndicators() {
@@ -54,7 +59,13 @@ export class ControlManager {
    
   }
 
-  private async reportPlaceSettlement(vertex: VertexId) {
+  // In my latest thinking each "action" is atomic whereas placing a settlement 
+  // without confimration just notifies the server which can in turn notify other clients.
+  private notifyPendingSettelment(vertex: VertexId) {
+    // TODO(danielglasgow)
+  }
+
+  private async commit(vertex: VertexId) {
     const newState =  await SERVER.placeSettlement(vertex); 
     console.log("GOT SERVER STATE UPDATE");
     console.log(newState.settlements);
@@ -73,4 +84,5 @@ export class ControlManager {
   }
 }
 
+// TODO(danielglasgow): Refactor to useContext (rather than globale singleton)
 export const CONTROL_MANAGER = new ControlManager();

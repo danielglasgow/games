@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Board from "./board";
 import { AppControl } from "./control";
@@ -9,6 +9,7 @@ import { GameContext } from "./game/context";
 import { CONTROL_MANAGER } from "./control/manager";
 
 function App({ app }: { app: AppState }) {
+  useLayoutEffect(() => CONTROL_MANAGER.startOrContinueTurn())
   const [state, setState] = useState(app);
   const game = createGameState(state.server);
   CONTROL_MANAGER.registerSync(setState);

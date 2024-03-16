@@ -4,6 +4,7 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 
 import { SERVER } from "./server/fake";
+import { CONTROL_MANAGER } from "./control/manager";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

@@ -5,6 +5,7 @@ import { GameState } from "./state";
 export interface TurnOrchestrator {
   onVertexClicked(vertex: VertexId): void;
   onEdgeClicked(edge: EdgeId): void;
+  startOrContinue(): void;
 }
 
 class UninitializedTurnOrchestrator implements TurnOrchestrator {
@@ -12,6 +13,9 @@ class UninitializedTurnOrchestrator implements TurnOrchestrator {
     throw new Error("Turn orchestrator not initialized");
   }
   onEdgeClicked(edge: EdgeId): void {
+    throw new Error("Turn orchestrator not initialized");
+  }
+  startOrContinue(): void {
     throw new Error("Turn orchestrator not initialized");
   }
 }
@@ -26,6 +30,10 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
   private settlement?: VertexId;
   private road?: EdgeId;
 
+  startOrContinue() {
+    this.showAllOpenVertecies();
+  }
+
   onVertexClicked(vertex: VertexId) {
     if (!this.settlement) {
       this.control.hideAllVertexIndicators();
@@ -37,14 +45,7 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
     } else if (this.settlement.equals(vertex)) {
       this.settlement = undefined;
       this.control.getVertex(vertex).removeBuilding();
-      for (const vertex of this.game.getVertecies()) {
-        if (this.game.isBuildingAllowed(vertex)) {
-          if (!this.control.getVertex(vertex)) {
-            console.log(vertex.toString());
-          }
-          this.control.getVertex(vertex)?.showIndicator();
-        }
-      }
+      this.showAllOpenVertecies();
       for (const edge of vertex.adjacentEdges()) {
         this.control.getEdge(edge).hideIndicator();
       }
@@ -56,6 +57,18 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
       this.road = edge;
     } else if (this.road.equals(edge)) {
       this.road = undefined;
+    }
+  }
+
+  private showAllOpenVertecies() {
+    for (const vertex of this.game.getVertecies()) {
+      if (this.game.isBuildingAllowed(vertex)) {
+        if (!this.control.getVertex(vertex)) {
+          // TODO(danielglasgow): Fix this bad controlflow
+          continue; 
+        }
+        this.control.getVertex(vertex)?.showIndicator();
+      }
     }
   }
 }
