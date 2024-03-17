@@ -1,19 +1,15 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { AppControl } from "./control";
-import { Controller } from "./control/controller";
 import { CONTROL_MANAGER } from "./control/manager";
 
 interface SidePanelState {
   showConfirm: boolean;
 }
 
-export class SidePanelControl extends Controller {
+export class SidePanelControl {
   constructor(
-    parent: Controller,
     private readonly state: SidePanelState,
     private readonly setState: Dispatch<SetStateAction<SidePanelState>>
   ) {
-    super(parent);
   }
 
   private confirmResolver: (isConfirmed: boolean) => void = () => {};
@@ -36,10 +32,9 @@ export class SidePanelControl extends Controller {
 }
 
 
-export function SidePanel(app: AppControl) {
+export function SidePanel() {
   const [state, setState] = useState({showConfirm: false});
-  const control = new SidePanelControl(app, state, setState);
-  app.registerSidepanelControl(control);
+  const control = new SidePanelControl(state, setState);
   return (
     <div
       id="actionbox"

@@ -1,12 +1,11 @@
 import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Board from "./board";
-import { AppControl } from "./control";
-import {createGameState } from "./game/state";
+import { CONTROL_MANAGER } from "./control/manager";
+import { GameContext } from "./game/context";
+import { createGameState } from "./game/state";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
-import { GameContext } from "./game/context";
-import { CONTROL_MANAGER } from "./control/manager";
 
 function App({ app }: { app: AppState }) {
   useLayoutEffect(() => CONTROL_MANAGER.startOrContinueTurn())
@@ -14,7 +13,6 @@ function App({ app }: { app: AppState }) {
   const game = createGameState(state.server);
   CONTROL_MANAGER.registerSync(setState);
   CONTROL_MANAGER.registerGame(game);
-  const control = new AppControl(state, setState);
   return (
     <div>
       <GameContext.Provider value={game}>
@@ -33,7 +31,7 @@ function App({ app }: { app: AppState }) {
           >
             <Board layout={state.server.board} />
           </div>
-          {SidePanel(control)}
+          <SidePanel/>
         </div>
       </GameContext.Provider>
     </div>
