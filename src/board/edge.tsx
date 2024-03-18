@@ -1,5 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { CONTROL_MANAGER } from "../control/manager";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import {
   HEX_HEIGHT_VMIN,
   HEX_SIDE_VMIN,
@@ -12,6 +11,7 @@ import {
   ROAD_SPACING_VMIN,
 } from "./dimensions";
 import { EdgeLocation } from "./location";
+import { GameContext } from "../game/context";
 
 // Once the indicator centered along the left / right edge of the hex box,
 // how much to shift it to get it into position
@@ -39,9 +39,10 @@ export class EdgeControl {
 
 
 export function Edge(props: EdgeProps) {
+  const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(false);
   const control = new EdgeControl(props.location, setShowIndicator);
-  CONTROL_MANAGER.registerEdge(control);
+  game.control.registerEdge(control);
   switch (props.location.position) {
     case "TOP":
       return TopEdge(showIndicator);

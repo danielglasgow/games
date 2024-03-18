@@ -1,5 +1,5 @@
 import { EdgeLocation, VertexLocation } from "../board";
-import { ControlManager } from "../control/manager";
+import { GameControl } from "./control";
 import { GameState } from "./state";
 
 export interface TurnOrchestrator {
@@ -25,7 +25,7 @@ export function createUninitializedTurnOrchestrator(): TurnOrchestrator {
 }
 
 export class InitialPlacementOrchestrator implements TurnOrchestrator {
-  constructor(private control: ControlManager, private game: GameState) {}
+  constructor(private state: GameState, private control: GameControl) {}
 
   private settlement?: VertexLocation;
   private road?: EdgeLocation;
@@ -61,8 +61,8 @@ export class InitialPlacementOrchestrator implements TurnOrchestrator {
   }
 
   private showAllOpenVertecies() {
-    for (const vertex of this.game.getVertecies()) {
-      if (this.game.isBuildingAllowed(vertex)) {
+    for (const vertex of this.state.getVertecies()) {
+      if (this.state.isBuildingAllowed(vertex)) {
         if (!this.control.getVertex(vertex)) {
           // TODO(danielglasgow): Fix this bad controlflow
           continue; 

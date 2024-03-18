@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, useState } from "react";
-import { CONTROL_MANAGER } from "./control/manager";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { GameContext } from "./game/context";
 
 interface SidePanelState {
   showConfirm: boolean;
@@ -33,6 +33,7 @@ export class SidePanelControl {
 
 
 export function SidePanel() {
+  const game = useContext(GameContext);
   const [state, setState] = useState({showConfirm: false});
   const control = new SidePanelControl(state, setState);
   return (
@@ -51,7 +52,7 @@ export function SidePanel() {
       </button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place City</button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place Road</button>
-      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => CONTROL_MANAGER.hideAllVertexIndicators()}>
+      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => game.control.hideAllVertexIndicators()}>
         Turn Off All Vertex Indicators 
       </button>
       <div>

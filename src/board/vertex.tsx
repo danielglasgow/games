@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from "react";
-import { CONTROL_MANAGER } from "../control/manager";
-import { GameContext } from "../game/context";
+import { Game, GameContext } from "../game/context";
 import { Building as BuildingType } from "../server/types";
 import { Building } from "./building";
 import {
@@ -28,7 +27,7 @@ interface BuiltVertexProps extends VertexProps {
 }
 
 export interface VertexControl {
-  readonly location: VertexLocation;
+readonly location: VertexLocation;
   showIndicator(): void;
   hideIndicator(): void;
   setBuilding(building: BuildingType): void;
@@ -42,12 +41,15 @@ interface VertexControlInternal {
 class OpenVertexControl implements VertexControl, VertexControlInternal {
   private readonly type = "OPEN_VERTEX";
   constructor(
-    public readonly location: VertexLocation,
+    readonly game: Game,
+    readonly location: VertexLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>,
     private readonly setBuildingState: Dispatch<
       SetStateAction<BuildingType | undefined>
     >
-  ) {}
+  ) {
+    game.control.registerVertex(this);
+  }
 
   showIndicator() {
     this.setShowIndicator(true);
@@ -66,7 +68,7 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    CONTROL_MANAGER.onVertexClick(this.location);
+    this.game.control.onVertexClick(this.location); 
   }
 
   static isInstance(control: VertexControl): control is OpenVertexControl {
@@ -77,9 +79,12 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
 class BuiltVertexControl implements VertexControl, VertexControlInternal {
   private readonly type = "BUILT_VERTEX";
   constructor(
-    public readonly location: VertexLocation,
+    readonly game: Game,
+    readonly location: VertexLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>
-  ) {}
+  ) {
+    game.control.registerVertex(this);
+  }
 
   showIndicator() {
     this.setShowIndicator(true);
@@ -102,7 +107,7 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    CONTROL_MANAGER.onVertexClick(this.location);
+    this.game.control.onVertexClick(this.location); 
   }
 
   static isInstance(control: VertexControl): control is BuiltVertexControl {
@@ -113,12 +118,12 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
 export function Vertex(props: VertexProps) {
   const { location } = props;
   const game = useContext(GameContext);
-  const fixedBuilding = game.getFixedBuilding(location);
+  const fixedBuilding = game.state.getFixedBuilding(location);
   if (fixedBuilding) {
     return <BuiltVertex location={props.location} fixedBuilding={fixedBuilding} />;
   }
-  if (game.isBuildingAllowed(location)) {
-    return <OpenVertex location={location} pendingBuilding={game.getPendingBuilding(location)} />;
+  if (game.state.isBuildingAllowed(location)) {
+    return <OpenVertex location={location} pendingBuilding={game.state.getPendingBuilding(location)} />;
   }
   return <div></div>;
 }
@@ -154,9 +159,9 @@ function getStyles(side: "LEFT" | "RIGHT", showIndicator: boolean): any {
 }
 
 function BuiltVertex(props: BuiltVertexProps) {
+  const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(false);
-  const control = new BuiltVertexControl(props.location, setShowIndicator);
-  CONTROL_MANAGER.registerVertex(control);
+  const control = new BuiltVertexControl(game, props.location, setShowIndicator);
   return (
     <div
       style={getStyles(props.location.side, showIndicator)}
@@ -168,14 +173,15 @@ function BuiltVertex(props: BuiltVertexProps) {
 }
 
 function OpenVertex(props: OpenVertexProps) {
+  const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(false);
   const [building, setBuilding] = useState(props.pendingBuilding);
   const control = new OpenVertexControl(
+    game,
     props.location,
     setShowIndicator,
     setBuilding
   );
-  CONTROL_MANAGER.registerVertex(control);
   return (
     <div
       style={getStyles(props.location.side, showIndicator)}

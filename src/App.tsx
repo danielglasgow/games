@@ -1,18 +1,15 @@
 import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Board from "./board";
-import { CONTROL_MANAGER } from "./control/manager";
-import { GameContext } from "./game/context";
-import { createGameState } from "./game/state";
+import { GameContext, createGame } from "./game/context";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
 
 function App({ app }: { app: AppState }) {
-  useLayoutEffect(() => CONTROL_MANAGER.startOrContinueTurn())
   const [state, setState] = useState(app);
-  const game = createGameState(state.server);
-  CONTROL_MANAGER.registerSync(setState);
-  CONTROL_MANAGER.registerGame(game);
+  const game = createGame(state.server);
+  useLayoutEffect(() => game.startOrContinueTurn())
+  game.control.registerSync(setState);
   return (
     <div>
       <GameContext.Provider value={game}>
