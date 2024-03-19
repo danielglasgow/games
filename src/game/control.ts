@@ -4,7 +4,6 @@ import { EdgeControl } from "../board/edge";
 import { VertexControl } from "../board/vertex";
 import { SERVER } from "../server/fake";
 import { AppState } from "../types";
-import { TurnOrchestrator } from "./orchestration";
 
 export class GameControl {
   private readonly vertecies: { [k: string]: VertexControl } = {};
@@ -15,13 +14,7 @@ export class GameControl {
     );
   };
 
-  private turn?: TurnOrchestrator;
-
-  registerTurn(turn: TurnOrchestrator) {
-    this.turn = turn;
-  } 
-
-  registerVertex(control: VertexControl) {
+    registerVertex(control: VertexControl) {
     this.vertecies[control.location.key()] = control;
   }
 
@@ -45,12 +38,6 @@ export class GameControl {
 
   getEdge(edge: EdgeLocation) {
     return this.edges[edge.key()];
-  }
-
-  // Consider making this event driven
-  onVertexClick(vertex: VertexLocation) {
-    console.log("VERTEX CLICKED: " + vertex.key());
-    this.turn!.onVertexClicked(vertex);
   }
 
   // In my latest thinking each "action" is atomic whereas placing a settlement

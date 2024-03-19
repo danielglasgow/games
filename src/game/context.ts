@@ -3,12 +3,12 @@ import { GameControl } from "./control";
 import { GameState, createGameState } from "./state";
 
 import { GameState as ServerGameState } from "../server/types";
-import { InitialPlacementOrchestrator } from "./orchestration";
+import { GameTurn, InitialPlacement } from "./orchestration";
 
 export interface Game {
   state: GameState;
+  turn: GameTurn;
   control: GameControl;
-  startOrContinueTurn(): void;
 }
 
 class UninitializedGame implements Game {
@@ -20,7 +20,7 @@ class UninitializedGame implements Game {
     throw new Error("Game Context is unset");
   }
 
-  public startOrContinueTurn(): void {
+  public get turn(): GameTurn {
     throw new Error("Game Context is unset");
   }
 }
@@ -28,13 +28,8 @@ class UninitializedGame implements Game {
 export function createGame(server: ServerGameState): Game {
   const state = createGameState(server);
   const control = new GameControl();
-  const turn = new InitialPlacementOrchestrator(state, control);
-  control.registerTurn(turn);
-  return {
-    state, control, startOrContinueTurn: () => {
-      turn.startOrContinue();
-    }
-  }
+  const turn = new InitialPlacement(state, control);
+  return { state, control, turn};
 }
 
 export const GameContext: Context<Game> = createContext(

@@ -2,13 +2,13 @@ import { EdgeLocation, VertexLocation } from "../board";
 import { GameControl } from "./control";
 import { GameState } from "./state";
 
-export interface TurnOrchestrator {
+export interface  GameTurn {
   onVertexClicked(vertex: VertexLocation): void;
   onEdgeClicked(edge: EdgeLocation): void;
   startOrContinue(): void;
 }
 
-class UninitializedTurnOrchestrator implements TurnOrchestrator {
+class UninitializedGameTurn implements GameTurn {
   onVertexClicked(vertex: VertexLocation): void {
     throw new Error("Turn orchestrator not initialized");
   }
@@ -20,11 +20,11 @@ class UninitializedTurnOrchestrator implements TurnOrchestrator {
   }
 }
 
-export function createUninitializedTurnOrchestrator(): TurnOrchestrator {
-  return new UninitializedTurnOrchestrator();
+export function createUninitializedGameTurn(): GameTurn {
+  return new UninitializedGameTurn();
 }
 
-export class InitialPlacementOrchestrator implements TurnOrchestrator {
+export class InitialPlacement implements GameTurn {
   constructor(private state: GameState, private control: GameControl) {}
 
   private settlement?: VertexLocation;

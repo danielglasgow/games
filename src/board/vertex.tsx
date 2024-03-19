@@ -68,7 +68,7 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    this.game.control.onVertexClick(this.location); 
+    this.game.turn.onVertexClicked(this.location); 
   }
 
   static isInstance(control: VertexControl): control is OpenVertexControl {
@@ -107,7 +107,7 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    this.game.control.onVertexClick(this.location); 
+    this.game.turn.onVertexClicked(this.location); 
   }
 
   static isInstance(control: VertexControl): control is BuiltVertexControl {
