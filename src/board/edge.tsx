@@ -42,7 +42,7 @@ export function Edge(props: EdgeProps) {
   const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(false);
   const control = new EdgeControl(props.location, setShowIndicator);
-  game.control.registerEdge(control);
+  game.control.attachEdge(control);
   switch (props.location.position) {
     case "TOP":
       return TopEdge(showIndicator);

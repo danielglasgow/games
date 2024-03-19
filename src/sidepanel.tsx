@@ -52,9 +52,6 @@ export function SidePanel() {
       </button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place City</button>
       <button style={{ margin: "10px", width: "20vmin" }}>Place Road</button>
-      <button style={{ margin: "10px", width: "20vmin" }} onClick={() => game.control.hideAllVertexIndicators()}>
-        Turn Off All Vertex Indicators 
-      </button>
       <div>
         {state.showConfirm && (
           <button

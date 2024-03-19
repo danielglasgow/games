@@ -1,31 +1,41 @@
+import { Dispatch, SetStateAction } from "react";
 import { EdgeLocation, VertexLocation } from "../board";
-import { GameControl } from "./control";
+import { AppState } from "../types";
+import { Control } from "./control";
 import { GameState } from "./state";
 
-export interface  GameTurn {
+export interface GameTurn {
   onVertexClicked(vertex: VertexLocation): void;
   onEdgeClicked(edge: EdgeLocation): void;
   startOrContinue(): void;
 }
 
-class UninitializedGameTurn implements GameTurn {
-  onVertexClicked(vertex: VertexLocation): void {
-    throw new Error("Turn orchestrator not initialized");
+abstract class BaseGameTurn implements GameTurn {
+  constructor(
+    private readonly setAppState: Dispatch<SetStateAction<AppState>>
+  ) {}
+
+  notify() {
+    // TODO(danielglasgow): Notify the server of a non-binding action
   }
-  onEdgeClicked(edge: EdgeLocation): void {
-    throw new Error("Turn orchestrator not initialized");
+  commit(): Promise<void> {
+    // TODO(danielglasgow): Commit an action to the server and update the app state with the response
+    return Promise.resolve();
   }
-  startOrContinue(): void {
-    throw new Error("Turn orchestrator not initialized");
-  }
+
+  abstract onVertexClicked(vertex: VertexLocation): void;
+  abstract onEdgeClicked(edge: EdgeLocation): void;
+  abstract startOrContinue(): void;
 }
 
-export function createUninitializedGameTurn(): GameTurn {
-  return new UninitializedGameTurn();
-}
-
-export class InitialPlacement implements GameTurn {
-  constructor(private state: GameState, private control: GameControl) {}
+export class InitialPlacement extends BaseGameTurn {
+  constructor(
+    private readonly state: GameState,
+    private readonly control: Control,
+    setAppState: Dispatch<SetStateAction<AppState>>
+  ) {
+    super(setAppState);
+  }
 
   private settlement?: VertexLocation;
   private road?: EdgeLocation;
@@ -36,7 +46,7 @@ export class InitialPlacement implements GameTurn {
 
   onVertexClicked(vertex: VertexLocation) {
     if (!this.settlement) {
-      this.control.hideAllVertexIndicators();
+      this.control.getVertecies().forEach(vertex => vertex.hideIndicator());
       this.control.getVertex(vertex).setBuilding("SETTLEMENT");
       this.settlement = vertex;
       for (const edge of vertex.adjacentEdges()) {
@@ -65,7 +75,7 @@ export class InitialPlacement implements GameTurn {
       if (this.state.isBuildingAllowed(vertex)) {
         if (!this.control.getVertex(vertex)) {
           // TODO(danielglasgow): Fix this bad controlflow
-          continue; 
+          continue;
         }
         this.control.getVertex(vertex)?.showIndicator();
       }

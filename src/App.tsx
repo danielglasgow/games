@@ -7,9 +7,8 @@ import { AppState } from "./types";
 
 function App({ app }: { app: AppState }) {
   const [state, setState] = useState(app);
-  const game = createGame(state.server);
+  const game = createGame(app.server, setState);
   useLayoutEffect(() => game.turn.startOrContinue())
-  game.control.registerSync(setState);
   return (
     <div>
       <GameContext.Provider value={game}>

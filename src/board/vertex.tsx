@@ -48,7 +48,7 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
       SetStateAction<BuildingType | undefined>
     >
   ) {
-    game.control.registerVertex(this);
+    game.control.attachVertex(this);
   }
 
   showIndicator() {
@@ -83,7 +83,7 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
     readonly location: VertexLocation,
     private readonly setShowIndicator: Dispatch<SetStateAction<boolean>>
   ) {
-    game.control.registerVertex(this);
+    game.control.attachVertex(this);
   }
 
   showIndicator() {
