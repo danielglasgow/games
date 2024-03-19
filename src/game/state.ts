@@ -1,4 +1,4 @@
-import { VertexLocation } from "../board";
+import { EdgeLocation, VertexLocation } from "../board";
 import {
   Building,
   GameState as ServerGameState,
@@ -10,6 +10,7 @@ export interface GameState {
   getVertecies(): ReadonlyArray<VertexLocation>;
   isBuildingAllowed(vertex: VertexLocation): boolean;
   isEmpty(vertex: VertexLocation): boolean;
+  hasRoad(location: EdgeLocation): boolean;
 }
 
 export class ServerGameStateWrapper implements GameState {
@@ -56,6 +57,14 @@ export class ServerGameStateWrapper implements GameState {
         .values()
         .every((location) => !location.equals(vertex))
     );
+  }
+
+  hasRoad(location: EdgeLocation): boolean {
+    return false; 
+  }
+
+  private roadLocations() {
+
   }
 
   private cityLocations() {

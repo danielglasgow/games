@@ -46,7 +46,7 @@ export class InitialPlacement extends BaseGameTurn {
 
   onVertexClicked(vertex: VertexLocation) {
     if (!this.settlement) {
-      this.control.getVertecies().forEach(vertex => vertex.hideIndicator());
+      this.control.getVertecies().forEach((vertex) => vertex.hideIndicator());
       this.control.getVertex(vertex).setBuilding("SETTLEMENT");
       this.settlement = vertex;
       for (const edge of vertex.adjacentEdges()) {
@@ -57,15 +57,28 @@ export class InitialPlacement extends BaseGameTurn {
       this.control.getVertex(vertex).removeBuilding();
       this.showAllOpenVertecies();
       for (const edge of vertex.adjacentEdges()) {
+        this.control.getEdge(edge).removeRoad();
         this.control.getEdge(edge).hideIndicator();
       }
     }
   }
 
   onEdgeClicked(edge: EdgeLocation) {
+    if (!this.settlement) {
+      return;
+    }
     if (!this.road) {
+      this.control.getEdge(edge).placeRoad();
+      this.control.getEdges().forEach((e) => e.hideIndicator());
+      for (const edge of this.settlement.adjacentEdges()) {
+        this.control.getEdge(edge).hideIndicator();
+      }
       this.road = edge;
     } else if (this.road.equals(edge)) {
+      this.control.getEdge(edge).removeRoad();
+      for (const edge of this.settlement.adjacentEdges()) {
+        this.control.getEdge(edge).showIndicator();
+      }
       this.road = undefined;
     }
   }

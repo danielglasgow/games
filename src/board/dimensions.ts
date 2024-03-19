@@ -4,6 +4,7 @@ const BUFFER_VMIN = 2; // Extra space around the board to ensure all tiles fit a
 const ROWS = 7;
 const COLUMNS = 7;
 const PLACEMENT_INDICATOR_PCT = 20;
+const ROAD_LENGTH_PCT = 40;
 
 // DO NOT TUNE BELOW HERE
 
@@ -47,6 +48,8 @@ export const HEX_OVERALY_OFFSET_VMIN =
 export const PLACEMENT_INDICATOR_VMIN =
   HEX_DIAMETER_VMIN * (PLACEMENT_INDICATOR_PCT / 100);
 
+export const ROAD_LENGTH_VMIN = HEX_DIAMETER_VMIN * (ROAD_LENGTH_PCT / 100);
+
 // Moves the indicator outside the top of the hex box
 const OUTSIDE_TOP = -1 * PLACEMENT_INDICATOR_VMIN;
 // Moves the indicator outside to the left side of the hex box
@@ -58,15 +61,13 @@ const OUTSIDE_RIGHT = HEX_DIAMETER_VMIN;
  * Placement indicator positioned so the hex box's top border splits the indicator
  * (i.e. so that the indicator could be foldered over the X axis)
  */
-export const INDICATOR_Y_HEX_TOP =
-  OUTSIDE_TOP + PLACEMENT_INDICATOR_VMIN / 2;
+export const INDICATOR_Y_HEX_TOP = OUTSIDE_TOP + PLACEMENT_INDICATOR_VMIN / 2;
 
 /**
  * Placement indicator positioned so the hex box's left border splits the indicator
  * (i.e. so that the indicator could be foldered over the Y axis)
  */
-export const INDICATOR_X_HEX_LEFT =
-  OUTSIDE_LEFT + PLACEMENT_INDICATOR_VMIN / 2;
+export const INDICATOR_X_HEX_LEFT = OUTSIDE_LEFT + PLACEMENT_INDICATOR_VMIN / 2;
 
 /**
  * Placement indicator positioned so the hex box's right border splits the indicator
@@ -75,10 +76,9 @@ export const INDICATOR_X_HEX_LEFT =
 export const INDICATOR_X_HEX_RIGHT =
   OUTSIDE_RIGHT - PLACEMENT_INDICATOR_VMIN / 2;
 
-
 /**
  * Placement indicator positioned so the left/right middle of the hex box splits the indicator
  * (i.e. so that the indicator could be foldered over the Y axis)
  */
-export const INDICATOR_X_HEX_MIDDLE = 
+export const INDICATOR_X_HEX_MIDDLE =
   INDICATOR_X_HEX_LEFT + HEX_DIAMETER_VMIN / 2;
