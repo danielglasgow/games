@@ -3,7 +3,7 @@ import { GameControl } from "./control";
 import { GameState, createGameState } from "./state";
 
 import { GameState as ServerGameState } from "../server/types";
-import { GameTurn, InitialPlacement } from "./orchestration";
+import { GameTurn, InitialPlacement } from "./turn";
 
 export interface Game {
   state: GameState;
@@ -13,15 +13,15 @@ export interface Game {
 
 class UninitializedGame implements Game {
   public get state(): GameState {
-    throw new Error("Game Context is unset");
+    throw new Error("GameContext is unset");
   }
 
   public get control(): GameControl {
-    throw new Error("Game Context is unset");
+    throw new Error("GameContext is unset");
   }
 
   public get turn(): GameTurn {
-    throw new Error("Game Context is unset");
+    throw new Error("GameContext is unset");
   }
 }
 

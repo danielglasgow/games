@@ -27,7 +27,7 @@ interface BuiltVertexProps extends VertexProps {
 }
 
 export interface VertexControl {
-readonly location: VertexLocation;
+  readonly location: VertexLocation;
   showIndicator(): void;
   hideIndicator(): void;
   setBuilding(building: BuildingType): void;
@@ -68,7 +68,7 @@ class OpenVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    this.game.turn.onVertexClicked(this.location); 
+    this.game.turn.onVertexClicked(this.location);
   }
 
   static isInstance(control: VertexControl): control is OpenVertexControl {
@@ -107,7 +107,7 @@ class BuiltVertexControl implements VertexControl, VertexControlInternal {
   }
 
   onClick() {
-    this.game.turn.onVertexClicked(this.location); 
+    this.game.turn.onVertexClicked(this.location);
   }
 
   static isInstance(control: VertexControl): control is BuiltVertexControl {
@@ -120,10 +120,12 @@ export function Vertex(props: VertexProps) {
   const game = useContext(GameContext);
   const fixedBuilding = game.state.getFixedBuilding(location);
   if (fixedBuilding) {
-    return <BuiltVertex location={props.location} fixedBuilding={fixedBuilding} />;
+    return (
+      <BuiltVertex location={props.location} fixedBuilding={fixedBuilding} />
+    );
   }
   if (game.state.isBuildingAllowed(location)) {
-    return <OpenVertex location={location} pendingBuilding={game.state.getPendingBuilding(location)} />;
+    return <OpenVertex location={location} />;
   }
   return <div></div>;
 }
@@ -161,7 +163,11 @@ function getStyles(side: "LEFT" | "RIGHT", showIndicator: boolean): any {
 function BuiltVertex(props: BuiltVertexProps) {
   const game = useContext(GameContext);
   const [showIndicator, setShowIndicator] = useState(false);
-  const control = new BuiltVertexControl(game, props.location, setShowIndicator);
+  const control = new BuiltVertexControl(
+    game,
+    props.location,
+    setShowIndicator
+  );
   return (
     <div
       style={getStyles(props.location.side, showIndicator)}
@@ -191,5 +197,3 @@ function OpenVertex(props: OpenVertexProps) {
     </div>
   );
 }
-
-

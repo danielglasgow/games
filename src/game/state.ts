@@ -7,7 +7,6 @@ import {
 
 export interface GameState {
   getFixedBuilding(vertex: VertexLocation): Building | undefined;
-  getPendingBuilding(vertex: VertexLocation): Building | undefined;
   getVertecies(): ReadonlyArray<VertexLocation>;
   isBuildingAllowed(vertex: VertexLocation): boolean;
   isEmpty(vertex: VertexLocation): boolean;
@@ -15,31 +14,6 @@ export interface GameState {
 
 export function createGameState(state: ServerGameState): GameState {
   return new ServerGameStateWrapper(state);
-}
-
-export function createUninitializedGameState(): GameState {
-  return new UninitiliazedGameState();
-}
-
-class UninitiliazedGameState implements GameState {
-  getFixedBuilding(vertex: VertexLocation): Building | undefined {
-    throw new Error("GameState not initialized");
-  }
-  getPendingBuilding(vertex: VertexLocation): Building | undefined {
-    throw new Error("GameState not initialized");
-  }
-  getVertecies(): VertexLocation[] {
-    throw new Error("GameState not initialized");
-  }
-  isBuildingAllowed(vertex: VertexLocation): boolean {
-    throw new Error("GameState not initialized");
-  }
-  isEmpty(vertex: VertexLocation): boolean {
-    throw new Error("GameState not initialized");
-  }
-  isVertexPlacementActive(): boolean {
-    throw new Error("GameState not initialized");
-  }
 }
 
 class ServerGameStateWrapper implements GameState {
@@ -64,10 +38,6 @@ class ServerGameStateWrapper implements GameState {
     if (city) {
       return "CITY";
     }
-  }
-
-  getPendingBuilding(vertex: VertexLocation): Building | undefined {
-    return undefined;
   }
 
   getVertecies() {
