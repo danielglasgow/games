@@ -1,13 +1,13 @@
 import { useLayoutEffect, useState } from "react";
 import "./App.css";
 import Board from "./board";
-import { GameContext, createGame } from "./game/context";
+import { GameContext, createGameContext } from "./game";
 import { SidePanel } from "./sidepanel";
 import { AppState } from "./types";
 
 function App({ app }: { app: AppState }) {
   const [state, setState] = useState(app);
-  const game = createGame(app.server, setState);
+  const game = createGameContext(state, setState);
   useLayoutEffect(() => game.turn.startOrContinue())
   return (
     <div>

@@ -11,7 +11,7 @@ import {
   ROAD_SPACING_VMIN,
 } from "./dimensions";
 import { EdgeLocation } from "./location";
-import { GameContext } from "../game/context";
+import { GameContext } from "../game";
 
 // Once the indicator centered along the left / right edge of the hex box,
 // how much to shift it to get it into position

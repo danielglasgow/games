@@ -12,11 +12,7 @@ export interface GameState {
   isEmpty(vertex: VertexLocation): boolean;
 }
 
-export function createGameState(state: ServerGameState): GameState {
-  return new ServerGameStateWrapper(state);
-}
-
-class ServerGameStateWrapper implements GameState {
+export class ServerGameStateWrapper implements GameState {
   constructor(private readonly state: ServerGameState) {}
 
   getTurn() {

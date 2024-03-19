@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from "react";
-import { Game, GameContext } from "../game/context";
+import { Game, GameContext } from "../game";
 import { Building as BuildingType } from "../server/types";
 import { Building } from "./building";
 import {

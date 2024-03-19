@@ -2,16 +2,16 @@ import { EdgeLocation, VertexLocation } from "../board";
 import { EdgeControl } from "../board/edge";
 import { VertexControl } from "../board/vertex";
 
+export interface GameControl {
+  attachVertex(control: VertexControl): void;
+  attachEdge(control: EdgeControl): void;
+}
+
 export interface Control {
   getVertex(location: VertexLocation): VertexControl;
   getVertecies(): VertexControl[];
   getEdge(location: EdgeLocation): EdgeControl;
   getEdges(): EdgeControl[];
-}
-
-export interface GameControl {
-  attachVertex(control: VertexControl): void;
-  attachEdge(control: EdgeControl): void;
 }
 
 export class ControlRegistry implements Control, GameControl {

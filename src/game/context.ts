@@ -1,8 +1,7 @@
 import { Context, Dispatch, SetStateAction, createContext } from "react";
 import { ControlRegistry, GameControl } from "./control";
-import { GameState, createGameState } from "./state";
+import { GameState, ServerGameStateWrapper } from "./state";
 
-import { GameState as ServerGameState } from "../server/types";
 import { AppState } from "../types";
 import { GameTurn, InitialPlacement } from "./turn";
 
@@ -26,11 +25,14 @@ class UninitializedGame implements Game {
   }
 }
 
-export function createGame(server: ServerGameState, setAppState: Dispatch<SetStateAction<AppState>>): Game {
-  const state = createGameState(server);
-  const control = new ControlRegistry(); 
+export function createGameContext(
+  app: AppState,
+  setAppState: Dispatch<SetStateAction<AppState>>
+): Game {
+  const state = new ServerGameStateWrapper(app.server);
+  const control = new ControlRegistry();
   const turn = new InitialPlacement(state, control, setAppState);
-  return { state, control, turn};
+  return { state, control, turn };
 }
 
 export const GameContext: Context<Game> = createContext(

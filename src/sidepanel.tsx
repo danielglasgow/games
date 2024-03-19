@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext, useState } from "react";
-import { GameContext } from "./game/context";
+import { GameContext } from "./game";
 
 interface SidePanelState {
   showConfirm: boolean;
