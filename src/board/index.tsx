@@ -1,7 +1,6 @@
 import { BoardLayout } from "../server/types";
 import { HEX_OVERALY_OFFSET_VMIN } from "./dimensions";
 import { Hexagon, Spacer } from "./hexagon";
-import { GameState } from "../game/state";
 
 interface BoardProps {
   layout: BoardLayout;
@@ -11,7 +10,12 @@ export default function Board(props: BoardProps) {
   const totalColumns = 7;
   const midPoint = Math.floor(totalColumns / 2);
   const columns = props.layout.columns.map((column, index) => {
-    const hexagons = column.map((layout) => <Hexagon layout={layout}  key={layout.location.toString()}/>);
+    const hexagons = column.map((layout) => (
+      <Hexagon
+        layout={layout}
+        key={`${layout.location.row},${layout.location.col}`}
+      />
+    ));
     return (
       <div
         style={{ display: "flex", flexDirection: "column" }}
@@ -36,3 +40,5 @@ export default function Board(props: BoardProps) {
     </div>
   );
 }
+
+export { EdgeLocation, VertexLocation } from "./location";

@@ -1,61 +1,28 @@
+import { EdgeLocation, VertexLocation } from "../board";
 import {
   Building,
   GameState as ServerGameState,
   VertexId,
-  isInitialPlacementTurn
 } from "../server/types";
-import { Turn } from "./turn";
 
 export interface GameState {
-  getFixedBuilding(vertex: VertexId): Building | undefined;
-  getPendingBuilding(vertex: VertexId): Building | undefined;
-  getVertecies(): ReadonlyArray<VertexId>;
-  isBuildingAllowed(vertex: VertexId): boolean;
-  isEmpty(vertex: VertexId): boolean;
-  isVertexPlacementActive(): boolean;
+  getFixedBuilding(vertex: VertexLocation): Building | undefined;
+  getVertecies(): ReadonlyArray<VertexLocation>;
+  isBuildingAllowed(vertex: VertexLocation): boolean;
+  isEmpty(vertex: VertexLocation): boolean;
+  hasRoad(location: EdgeLocation): boolean;
 }
 
-export function createGameState(state: ServerGameState): GameState {
-  return new ServerGameStateWrapper(state);
-}
-
-export function createUninitializedGameState(): GameState {
-  return new UninitiliazedGameState();
-}
-
-class UninitiliazedGameState implements GameState {
-  getFixedBuilding(vertex: VertexId): Building | undefined {
-    throw new Error("GameState not initialized");
-  }
-  getPendingBuilding(vertex: VertexId): Building | undefined {
-    throw new Error("GameState not initialized");
-  }
-  getVertecies(): VertexId[] {
-    throw new Error("GameState not initialized");
-  }
-  isBuildingAllowed(vertex: VertexId): boolean {
-    throw new Error("GameState not initialized");
-  }
-  isEmpty(vertex: VertexId): boolean {
-    throw new Error("GameState not initialized");
-  }
-  isVertexPlacementActive(): boolean {
-    throw new Error("GameState not initialized");
-  }
-}
-
-class ServerGameStateWrapper implements GameState {
+export class ServerGameStateWrapper implements GameState {
   constructor(private readonly state: ServerGameState) {}
 
   getTurn() {
     return this.state.turn;
   }
 
-  getFixedBuilding(vertex: VertexId): Building | undefined {
-    const settlement = this.state.settlements.find((s) =>
-      s.location.equals(vertex)
-    );
-    const city = this.state.cities.find((c) => c.location.equals(vertex));
+  getFixedBuilding(vertex: VertexLocation): Building | undefined {
+    const settlement = byLocation(this.state.settlements).get(vertex);
+    const city = byLocation(this.state.cities).get(vertex);
     if (settlement && city) {
       throw new Error(
         "Illegal board state, found both settlement and city on vertex: " +
@@ -70,39 +37,65 @@ class ServerGameStateWrapper implements GameState {
     }
   }
 
-  getPendingBuilding(vertex: VertexId): Building | undefined {
-    return new Turn(this.state).getPendingPlacement(vertex)?.name;
-  }
-
   getVertecies() {
-    return this.state.board.vertices;
+    return this.state.board.vertices.map((v) => new VertexLocation(v));
   }
 
-  isBuildingAllowed(vertex: VertexId) {
-    if (vertex.hex.row === 0) {
+  isBuildingAllowed(vertex: VertexLocation) {
+    if (vertex.isExteriorOf(this.state.board)) {
       return false;
-    }
-    if (vertex.hex.col === 0) {
-      return vertex.side === "RIGHT";
-    }
-    if (vertex.hex.col === this.state.board.columns.length - 1) {
-      return vertex.side === "LEFT";
     }
     return vertex.adjacentVertecies().every((v) => this.isEmpty(v));
   }
 
-  isEmpty(vertex: VertexId) {
+  isEmpty(vertex: VertexLocation) {
     return (
-      this.state.cities.every((c) => !c.location.equals(vertex)) &&
-      this.state.settlements.every((s) => !s.location.equals(vertex))
+      byLocation(this.state.settlements)
+        .values()
+        .every((location) => !location.equals(vertex)) &&
+      byLocation(this.state.cities)
+        .values()
+        .every((location) => !location.equals(vertex))
     );
   }
 
-  isVertexPlacementActive() {
-    const turn = this.state.turn;
-    if (isInitialPlacementTurn(turn)) {
-      return turn.phase === "PLACE_SETTLEMENT";
-    }
-    return turn.pendingAction === "PLACE_SETTLEMENT";
+  hasRoad(location: EdgeLocation): boolean {
+    return false; 
   }
+
+  private roadLocations() {
+
+  }
+
+  private cityLocations() {
+    return this.state.cities.map((c) => new VertexLocation(c.location));
+  }
+
+  private settlementLocations() {
+    return this.state.settlements.map((s) => new VertexLocation(s.location));
+  }
+}
+
+class ByLocation<T> {
+  constructor(
+    private readonly array: ReadonlyArray<VertexLocation>,
+    private readonly map: { [k: string]: T }
+  ) {}
+  get(location: VertexLocation) {
+    return this.map[location.key()];
+  }
+  values(): ReadonlyArray<VertexLocation> {
+    return this.array;
+  }
+}
+
+function byLocation<T extends { location: VertexId }>(array: ReadonlyArray<T>) {
+  const locations: { [k: string]: T } = {};
+  const values: VertexLocation[] = [];
+  for (const x of array) {
+    const location = new VertexLocation(x.location);
+    locations[location.key()] = x;
+    values.push(location);
+  }
+  return new ByLocation(Object.freeze(values), Object.freeze(locations));
 }

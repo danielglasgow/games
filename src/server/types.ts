@@ -1,3 +1,8 @@
+export interface Server {
+  //notify()
+  //commit()
+}
+
 export interface GameState {
   readonly board: BoardLayout;
   readonly turn: GameTurn | InitialPlacementTurn;
@@ -38,37 +43,20 @@ export interface PlayerYou extends Player {
 
 export interface GameTurn {
   player: string;
-  phase: "ROLL" | "BUILD";
-  pendingPlacements: ReadonlyArray<Settlement | City | Road>;
-  pendingAction: "PLACE_SETTLEMENT" | "PLACE_CITY" | "PLACE_ROAD" | "CONFIRM";
+  // Play could be build c/s/r, buy dev card, play dev card.
+  // With the exception of buy dev card, all these actions are considered pending until committed.
+  // Playing a dev card becomes final once all the choices are made.
+  // For example, if a knight is played, until the robber is moved and a card is stolen, the action is not final
+  // If a dev card is played, but it's action sequence is not finished, it reamins "revealed" -- i.e. face up, but playable.
+  // A victory point that is playd before the end of the game is a binary action.
+  // Before playing a dev card the palyer is warned that once played it will remain visible to all players,
+  // even if it's action has not yet been taken.
+  phase: "ROLL" | "MOVE_ROBBER" | "PLAY";
 }
 
-export type InitialPlacementTurn =
-  | OneInitialPlacementTurn
-  | TwoInitialPlacementTurn;
-
-interface PendingPlacements {
-  readonly settlement?: Settlement;
-  readonly road?: Road;
-}
-
-export interface OneInitialPlacementTurn {
+export interface InitialPlacementTurn {
   player: string;
-  phase: "PLACE_SETTLEMENT" | "PLACE_ROAD" | "CONFIRM";
-  pendingPlacements: PendingPlacements;
-}
-
-export interface TwoInitialPlacementTurn {
-  player: string;
-  phase:
-    | "PLACE_SETTLEMENT"
-    | "PLACE_SETTLEMENT_OR_ROAD"
-    | "PLACE_ROAD"
-    | "CONFIRM";
-  pendingPlacements: Readonly<{
-    first?: PendingPlacements;
-    second?: PendingPlacements;
-  }>;
+  type: "NOT_LAST" | "LAST";
 }
 
 export type Resource = "ORE" | "BRICK" | "WHEAT" | "WOOD" | "SHEEP";
@@ -146,151 +134,26 @@ export interface Road {
   readonly player: string;
 }
 
-export class HexId {
+export interface HexId {
   readonly row: number;
   readonly col: number;
-
-  constructor({ row, col }: { row: number; col: number }) {
-    this.row = row;
-    this.col = col;
-  }
-
-  equals(other?: HexId) {
-    return other && this.row === other.row && this.col === other.col;
-  }
-
-  toString() {
-    return `${this.row},${this.col}`;
-  }
 }
 
-export class VertexId {
-  constructor(readonly hex: HexId, readonly side: "LEFT" | "RIGHT") {}
-
-  equals(other?: VertexId | EdgeId) {
-    if (!other || isEdge(other)) {
-      return false;
-    }
-    return (
-      this.hex.row === other.hex.row &&
-      this.hex.col === other.hex.col &&
-      this.side === other.side
-    );
-  }
-
-  toString() {
-    return `${this.hex.row},${this.hex.col}:${this.side}`;
-  }
-
-  adjacentHexes(): { location: HexId }[] {
-    const { row, col } = this.hex;
-    switch (this.side) {
-      // TODO(danielglasgow):
-      // [sameHex(), adjacentColumnUpHex(), adjacentColumnDownHex()]
-      // Probably can reuse with vertex logic: e.g for vertex get a hex,
-      // and then ask for it's left or right vertex.
-      case "LEFT":
-        return [
-          { location: new HexId({ row: row, col: col }) },
-          { location: new HexId({ row: row, col: col - 1 }) },
-          { location: new HexId({ row: row - 1, col: col }) },
-        ];
-      case "RIGHT":
-        return [
-          { location: new HexId({ row: row, col: col }) },
-          { location: new HexId({ row: row - 1, col: col }) },
-          { location: new HexId({ row: row, col: col + 1 }) },
-        ];
-    }
-  }
-
-  adjacentVertecies() {
-    return [
-      this.sameHexOtherSide(),
-      this.adjacentColumnUp(),
-      this.adjacentColumnDown(),
-    ];
-  }
-
-  private sameHexOtherSide() {
-    const hex = new HexId({ row: this.hex.row, col: this.hex.col });
-    return new VertexId(hex, this.oppositeSide());
-  }
-
-  private adjacentColumnUp() {
-    const up = this.adjacentColumnIsBigger() ? 1 : 0;
-    const hex = new HexId({
-      row: this.hex.row + up,
-      col: this.adjacentColumn(),
-    });
-    return new VertexId(hex, this.oppositeSide());
-  }
-
-  private adjacentColumnDown() {
-    const down = this.adjacentColumnIsBigger() ? 0 : -1;
-    const hex = new HexId({
-      row: this.hex.row + down,
-      col: this.adjacentColumn(),
-    });
-    return new VertexId(hex, this.oppositeSide());
-  }
-
-  private adjacentColumn() {
-    switch (this.side) {
-      case "LEFT":
-        return this.hex.col - 1;
-      case "RIGHT":
-        return this.hex.col + 1;
-    }
-  }
-
-  oppositeSide() {
-    switch (this.side) {
-      case "LEFT":
-        return "RIGHT";
-      case "RIGHT":
-        return "LEFT";
-    }
-  }
-
-  private adjacentColumnIsBigger() {
-    const side = this.side;
-    if (side === "RIGHT") {
-      return this.hex.col < 3;
-    }
-    if (side === "LEFT") {
-      return this.hex.col > 3;
-    }
-  }
+export interface VertexId {
+  readonly hex: HexId;
+  readonly side: "LEFT" | "RIGHT";
 }
 
-export function isEdge(x: VertexId | EdgeId): x is EdgeId {
+function isEdge(x: VertexId | EdgeId): x is EdgeId {
   return (x as EdgeId).position != undefined;
 }
 
-export function isVertex(x: VertexId | EdgeId): x is VertexId {
-  return (x as VertexId).side != undefined;
-}
-
-export type VertexState = "SETTLEMENT" | "CITY" | "OPEN" | "CLOSED";
-
 export type Building = "SETTLEMENT" | "CITY";
 
-export class EdgeId {
-  constructor(readonly hex: HexId, readonly position: "INNER" | "OUTER") {}
-
-  equals(other?: VertexId | EdgeId) {
-    if (!other || isVertex(other)) {
-      return false;
-    }
-    return (
-      this.hex.row === other.hex.row &&
-      this.hex.col === other.hex.col &&
-      this.position === other.position
-    );
-  }
+export interface EdgeId {
+  readonly hex: HexId;
+  readonly position: "LEFT" | "RIGHT" | "TOP";
 }
-
 export interface BoardLayout {
   readonly columns: ReadonlyArray<ReadonlyArray<HexLayout>>;
   readonly vertices: ReadonlyArray<VertexId>;
@@ -300,13 +163,13 @@ export interface BoardLayout {
 export function isInitialPlacementTurn(
   turn: GameTurn | InitialPlacementTurn
 ): turn is InitialPlacementTurn {
-  return typeof (turn as InitialPlacementTurn).pendingPlacements === "object";
+  return (turn as InitialPlacementTurn).type != undefined;
 }
 
 export function isGameTurn(
   turn: GameTurn | InitialPlacementTurn
 ): turn is GameTurn {
-  return Array.isArray((turn as GameTurn).pendingPlacements);
+  return (turn as GameTurn).phase != undefined;
 }
 
 export function isRoad(x: Settlement | City | Road): x is Road {
