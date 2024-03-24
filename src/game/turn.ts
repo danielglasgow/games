@@ -54,6 +54,7 @@ export class InitialPlacement extends BaseGameTurn {
       }
     } else if (this.settlement.equals(vertex)) {
       this.settlement = undefined;
+      this.road = undefined;
       this.control.getVertex(vertex).removeBuilding();
       this.showAllOpenVertecies();
       for (const edge of vertex.adjacentEdges()) {
