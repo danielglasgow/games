@@ -62,10 +62,15 @@ export class InitialPlacement extends BaseGameTurn {
         this.control.getEdge(edge).hideIndicator();
       }
     }
+    // We can safely ignore: the user has clicked a vertex in the UI, 
+    // but the current action required is to select a road placement,
+    // or undo their current settlment placement, before choosing a new vertex.
   }
 
   onEdgeClicked(edge: EdgeLocation) {
     if (!this.settlement) {
+      // This is not an error case: the user has clicked an edge in the UI,
+      // but they need to select a settlement location first. We can safely ignore.
       return;
     }
     if (!this.road) {
