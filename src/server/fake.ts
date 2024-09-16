@@ -14,7 +14,7 @@ import {
 } from "./types";
 
 class FakeServer {
-  private state = newRandomGame();
+  private state: GameState = newRandomGame();
 
   placeSettlement(vertex: VertexId): Promise<GameState> {
     const state = copyAsMutable(this.state);
